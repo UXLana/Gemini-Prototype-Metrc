@@ -15,6 +15,20 @@ export interface Product {
   upc?: string;
 }
 
+export interface DashboardProduct {
+  id: string;
+  type: 'Product' | 'Bundle';
+  name: string;
+  licenseNumber: string;
+  brands: string[];
+  category?: string;
+  potency?: string;
+  subProducts?: string[]; // For bundles
+  markets: string[];
+  totalMarkets: number;
+  imageUrl: string;
+}
+
 export enum ViewState {
   SEARCH = 'SEARCH',
   CONFIRM = 'CONFIRM',

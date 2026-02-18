@@ -39,6 +39,11 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&q=80&w=800";
+    e.currentTarget.onerror = null;
+  };
+
   // Derived state for preview
   const feelingsList = formData.feelings.split(',').map(f => f.trim()).filter(Boolean);
 
@@ -300,6 +305,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                                 src={product.imageUrl} 
                                 alt="Product Preview" 
                                 className="w-full h-full object-cover"
+                                onError={handleImageError}
                             />
                         </div>
                         {/* Pagination Dots - Positioned below image with spacing */}
