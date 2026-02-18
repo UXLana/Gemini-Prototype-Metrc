@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Sparkles, ArrowLeft } from 'lucide-react';
+import { Search, X, Sparkles, ArrowLeft, Plus, AlertCircle } from 'lucide-react';
 import { Product, ViewState } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import { ProductCard } from './ProductCard';
 import { Button } from './Button';
 import { EditProductView } from './EditProductView';
 import { generateProductFromDescription } from '../services/geminiService';
+import { UseCase } from '../App';
 
 interface ProductRegistrationFlowProps {
   onClose: () => void;
+  useCase: UseCase;
 }
 
-export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose }) => {
+export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase }) => {
   // Application State
   const [view, setView] = useState<ViewState>(ViewState.SEARCH);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,9 +21,11 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   const [products, setProducts] = useState<Product[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [manualProduct, setManualProduct] = useState<Product | null>(null);
 
   // Derived State
-  const selectedProduct = products.find(p => p.id === selectedProductId);
+  const selectedProduct = manualProduct || products.find(p => p.id === selectedProductId);
+  const isNoResults = isTyping && products.length === 0 && !isGenerating && searchQuery.length > 0;
 
   // Handlers
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,11 +41,16 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
       setIsTyping(true);
       // Simulate API search latency slightly for realism
       setTimeout(() => {
-        const filtered = MOCK_PRODUCTS.filter(p => 
-          p.name.toLowerCase().includes(query.toLowerCase()) || 
-          p.licenseNumber.includes(query)
-        );
-        setProducts(filtered);
+        // UseCase 2 Logic: Always return empty if Mode is 'empty-search'
+        if (useCase === 'empty-search') {
+          setProducts([]);
+        } else {
+          const filtered = MOCK_PRODUCTS.filter(p => 
+            p.name.toLowerCase().includes(query.toLowerCase()) || 
+            p.licenseNumber.includes(query)
+          );
+          setProducts(filtered);
+        }
       }, 150);
     } else {
       setIsTyping(false);
@@ -54,6 +63,24 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     setProducts([]);
     setIsTyping(false);
     setSelectedProductId(null);
+    setManualProduct(null);
+  };
+
+  const handleCreateNewManual = () => {
+    const freshProduct: Product = {
+      id: `manual_${Date.now()}`,
+      name: searchQuery || "",
+      brand: "",
+      category: "",
+      licenseNumber: "",
+      potency: "",
+      markets: [],
+      totalMarkets: 0,
+      imageUrl: "", // Empty image for manual creation
+      description: ""
+    };
+    setManualProduct(freshProduct);
+    setView(ViewState.EDIT);
   };
 
   const handleGenerateWithAI = async () => {
@@ -70,6 +97,11 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   };
 
   const handleNext = useCallback(() => {
+    if (isNoResults) {
+      handleCreateNewManual();
+      return;
+    }
+
     if (selectedProductId) {
       if (view === ViewState.SEARCH) {
         setView(ViewState.CONFIRM);
@@ -77,13 +109,13 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
         setView(ViewState.EDIT);
       }
     }
-  }, [selectedProductId, view]);
+  }, [selectedProductId, view, isNoResults, searchQuery]);
 
   // Keyboard navigation support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
-        if ((view === ViewState.SEARCH || view === ViewState.CONFIRM) && selectedProductId) {
+        if ((view === ViewState.SEARCH || view === ViewState.CONFIRM) && (selectedProductId || isNoResults)) {
           handleNext();
         }
       }
@@ -95,7 +127,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, selectedProductId, handleNext, onClose]);
+  }, [view, selectedProductId, isNoResults, handleNext, onClose]);
 
   const handleCardDoubleClick = (productId: string) => {
     setSelectedProductId(productId);
@@ -106,6 +138,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
         setSearchQuery('');
         setProducts([]);
         setSelectedProductId(null);
+        setManualProduct(null);
         setView(ViewState.SEARCH);
         setIsTyping(false);
     } else if (view === ViewState.CONFIRM) {
@@ -117,6 +150,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
   const handleRemoveSelection = () => {
     setView(ViewState.SEARCH);
+    setSelectedProductId(null);
   };
 
   const handleSaveProduct = () => {
@@ -199,7 +233,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
           {view === ViewState.SEARCH && (
             <div className="h-full flex flex-col">
               
-              {/* Zero State - Prominent and Centered */}
+              {/* Zero State */}
               {!searchQuery && products.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300">
                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-100">
@@ -212,17 +246,17 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                 </div>
               )}
 
-              {/* AI Assist - No Results Found */}
-              {isTyping && products.length === 0 && !isGenerating && (
+              {/* Use Case 2: No Results Found State - NICE MESSAGE */}
+              {isNoResults && (
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-8 animate-in fade-in">
-                  <p className="text-gray-500 mb-5">No products found for "<span className="font-medium text-gray-900">{searchQuery}</span>"</p>
-                  <button 
-                    onClick={handleGenerateWithAI}
-                    className="inline-flex items-center text-sm text-emerald-700 hover:text-emerald-800 font-medium transition-colors bg-white px-5 py-2.5 rounded-full shadow-sm border border-emerald-100 hover:border-emerald-200 hover:shadow-md"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate details with AI
-                  </button>
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-5">
+                      <Search className="text-gray-400" size={28} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">No matches found</h3>
+                  <p className="text-gray-500 max-w-sm leading-relaxed mb-6">
+                      We couldn't find "<span className="font-semibold text-gray-900">{searchQuery}</span>" in the Metrc database. 
+                  </p>
+                  <p className="text-sm text-gray-400">You can create a new product entry below.</p>
                 </div>
               )}
 
@@ -266,12 +300,14 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
           
           <Button 
             variant="primary" 
-            disabled={!selectedProductId}
+            disabled={(!selectedProductId && !isNoResults) || isGenerating}
             onClick={handleNext}
             isLoading={isGenerating}
-            className="px-8 min-w-[120px]"
+            className={`px-8 transition-all ${isNoResults ? 'min-w-[200px]' : 'min-w-[120px]'}`}
           >
-            {view === ViewState.SEARCH ? 'Next' : 'Next'}
+            {isNoResults ? (
+               <span className="flex items-center gap-2"><Plus size={16} /> Create new product entry</span>
+            ) : "Next"}
           </Button>
         </div>
 

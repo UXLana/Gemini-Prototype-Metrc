@@ -15,11 +15,11 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full">
+    <div className="bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full cursor-pointer">
       
       {/* Image Header Area - Full Width & Taller */}
       <div className="relative h-56 w-full bg-gray-50 group-hover:opacity-95 transition-opacity">
-        <div className="absolute top-3 left-3 z-10">
+        <div className="absolute top-3 left-3 z-10" onClick={(e) => e.stopPropagation()}>
           <input type="checkbox" className="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600 bg-white/90 backdrop-blur shadow-sm cursor-pointer transition-transform hover:scale-105" />
         </div>
 
@@ -38,7 +38,6 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
           className="w-full h-full object-cover"
           onError={handleImageError}
         />
-        {/* Gradient for text readability if needed, though we have text below */}
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
 

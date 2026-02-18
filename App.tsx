@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { 
   Search, Bell, HelpCircle, Box, Home, Layers, Plus, 
   Filter, ArrowUpDown, LayoutGrid, List, ChevronLeft, ChevronRight,
-  MoreVertical, CheckSquare, FileText
+  MoreVertical, CheckSquare, FileText, Settings
 } from 'lucide-react';
 import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button } from './components/Button';
 
+export type UseCase = 'standard' | 'empty-search';
+
 export default function App() {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [useCase, setUseCase] = useState<UseCase>('standard');
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans">
@@ -40,6 +43,24 @@ export default function App() {
             Integrations
           </a>
         </nav>
+
+        {/* Use-case Switcher Dropdown at Bottom */}
+        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-2">Prototype Mode</label>
+          <div className="relative">
+            <select 
+              value={useCase} 
+              onChange={(e) => setUseCase(e.target.value as UseCase)}
+              className="w-full bg-white border border-gray-200 rounded-lg py-2 pl-3 pr-8 text-xs font-medium text-gray-700 appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            >
+              <option value="standard">Use Case 1: Standard</option>
+              <option value="empty-search">Use Case 2: Empty Search</option>
+            </select>
+            <div className="absolute right-2 top-2.5 pointer-events-none text-gray-400">
+              <ArrowUpDown size={12} />
+            </div>
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -145,7 +166,7 @@ export default function App() {
 
       {/* Registration Modal Overlay */}
       {isRegistrationModalOpen && (
-          <ProductRegistrationFlow onClose={() => setIsRegistrationModalOpen(false)} />
+          <ProductRegistrationFlow useCase={useCase} onClose={() => setIsRegistrationModalOpen(false)} />
       )}
     </div>
   );
