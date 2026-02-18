@@ -41,7 +41,7 @@ export const generateProductFromDescription = async (description: string): Promi
       const data = JSON.parse(response.text);
       return {
         ...data,
-        imageUrl: "https://picsum.photos/200" // Placeholder as Gemini doesn't return image URLs directly here
+        imageUrl: "https://images.unsplash.com/photo-1603909223429-69bb7df01f9c?auto=format&fit=crop&q=80&w=800" // Cannabis flower in jar
       };
     }
     return null;

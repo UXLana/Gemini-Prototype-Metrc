@@ -14,7 +14,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: "Our Blood Orange CBC gummies are made with real fruit and a Sativa enhanced botanical terpene blend, making them a great addition to a day out and about.",
     markets: ["CA", "NV"],
     totalMarkets: 2,
-    imageUrl: "https://picsum.photos/id/1080/400/400",
+    imageUrl: "https://images.unsplash.com/photo-1595348020949-87cdfbb44174?auto=format&fit=crop&q=80&w=800", // Red gummy/jelly texture
     upc: "892123000001"
   },
   {
@@ -30,7 +30,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: "Perfect for unwinding after a long day, these sour apple gummies pack a punch with natural fruit flavors.",
     markets: ["CA", "OR", "WA"],
     totalMarkets: 3,
-    imageUrl: "https://picsum.photos/id/1060/400/400",
+    imageUrl: "https://images.unsplash.com/photo-1582034986517-30d163aa1da9?auto=format&fit=crop&q=80&w=800", // Green/Yellow gummy bears
     upc: "892123000002"
   },
   {
@@ -46,7 +46,7 @@ export const MOCK_PRODUCTS: Product[] = [
     description: "Enhanced with CBN to promote restful sleep without the grogginess the next morning.",
     markets: ["CA"],
     totalMarkets: 1,
-    imageUrl: "https://picsum.photos/id/102/400/400",
+    imageUrl: "https://images.unsplash.com/photo-1600850056064-a8b380df8395?auto=format&fit=crop&q=80&w=800", // Dark purple berries/gummies
     upc: "892123000003"
   }
 ];
