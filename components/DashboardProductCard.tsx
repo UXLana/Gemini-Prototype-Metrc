@@ -4,10 +4,12 @@ import { DashboardProduct } from '../types';
 
 interface DashboardProductCardProps {
   product: DashboardProduct;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
   onClick?: () => void;
 }
 
-export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ product, onClick }) => {
+export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ product, selected = false, onSelect, onClick }) => {
   const isBundle = product.type === 'Bundle';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -23,13 +25,9 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
       
       {/* Image Header Area */}
       <div className="relative h-56 w-full bg-gray-50 dark:bg-gray-700 group-hover:opacity-95 transition-opacity flex-none">
-        <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
-           <div className="relative flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:border-brand-500 shadow-sm transition-colors group/checkbox">
-               <input 
-                 type="checkbox" 
-                 className="peer appearance-none absolute inset-0 w-full h-full cursor-pointer z-10" 
-               />
-               <Check size={14} className="text-brand-500 dark:text-brand-400 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+        <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); onSelect?.(product.id); }}>
+           <div className={`check-indicator w-5 h-5 shadow-sm cursor-pointer ${selected ? 'check-indicator-on' : 'check-indicator-off'}`}>
+             {selected && <Check size={14} className="text-white" />}
            </div>
         </div>
 

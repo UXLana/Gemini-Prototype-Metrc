@@ -28,6 +28,7 @@ export interface DashboardProduct {
   markets: string[];
   totalMarkets: number;
   imageUrl: string;
+  status?: 'Active' | 'Inactive';
   // Extended fields for detail view consistency
   subspecies?: string;
   strain?: string;

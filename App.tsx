@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, Bell, Box, Plus, 
   Filter, ArrowUpDown, LayoutGrid, List, ChevronLeft, ChevronRight,
-  FileText, Menu, Grip, ChevronDown, Moon, Sun
+  FileText, Menu, Grip, ChevronDown, Moon, Sun,
+  Trash2, Pencil, Package
 } from 'lucide-react';
 import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
+import { ProductListView, DEFAULT_COLUMNS, ProductColumn } from './components/ProductListView';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button } from './components/Button';
 import { Product, DashboardProduct } from './types';
@@ -33,6 +35,27 @@ export default function App() {
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
   
   const [dashboardProducts, setDashboardProducts] = useState<DashboardProduct[]>(DASHBOARD_PRODUCTS);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [listColumns, setListColumns] = useState<ProductColumn[]>(DEFAULT_COLUMNS);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+
+  const toggleSelectProduct = (id: string) => {
+    setSelectedProductIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedProductIds(prev => {
+      if (prev.size === dashboardProducts.length) return new Set();
+      return new Set(dashboardProducts.map(p => p.id));
+    });
+  };
+
+  const clearSelection = () => setSelectedProductIds(new Set());
 
   useEffect(() => {
     if (isDarkMode) {
@@ -209,27 +232,68 @@ export default function App() {
                     </div>
                     
                     <div className="flex flex-wrap items-center justify-between card p-2 gap-2">
-                        <span className="text-sm text-gray-500 dark:text-gray-400 pl-2">Selected: 0</span>
+                        <div className="flex items-center gap-2 pl-2">
+                            <span className={`text-sm ${selectedProductIds.size > 0 ? 'text-brand-600 dark:text-brand-400 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
+                                Selected: {selectedProductIds.size}
+                            </span>
+                            {selectedProductIds.size > 0 && (
+                                <>
+                                    <div className="h-5 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+                                    <IconButton onClick={() => {
+                                        const first = Array.from(selectedProductIds)[0];
+                                        const p = dashboardProducts.find(dp => dp.id === first);
+                                        if (p) handleProductClick(p);
+                                    }} title="Edit">
+                                        <Pencil size={16} />
+                                    </IconButton>
+                                    <IconButton onClick={() => showToast(`Bundle created from ${selectedProductIds.size} products`)} title="Create bundle">
+                                        <Package size={16} />
+                                    </IconButton>
+                                    <IconButton onClick={() => {
+                                        setDashboardProducts(prev => prev.filter(p => !selectedProductIds.has(p.id)));
+                                        clearSelection();
+                                        showToast(`${selectedProductIds.size} product(s) deleted`);
+                                    }} title="Delete">
+                                        <Trash2 size={16} />
+                                    </IconButton>
+                                </>
+                            )}
+                        </div>
                         <div className="flex items-center gap-2 ml-auto">
                             <IconButton><Filter size={16} /></IconButton>
                             <IconButton><ArrowUpDown size={16} /></IconButton>
                             <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
-                            <IconButton active><LayoutGrid size={16} /></IconButton>
-                            <IconButton><List size={16} /></IconButton>
+                            <IconButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')}><LayoutGrid size={16} /></IconButton>
+                            <IconButton active={viewMode === 'list'} onClick={() => setViewMode('list')}><List size={16} /></IconButton>
                         </div>
                     </div>
                 </div>
 
-                {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1500px]:grid-cols-5 gap-6 mb-8">
-                    {dashboardProducts.map(product => (
-                        <DashboardProductCard 
-                            key={product.id} 
-                            product={product} 
-                            onClick={() => handleProductClick(product)}
-                        />
-                    ))}
-                </div>
+                {/* Product Grid / List */}
+                {viewMode === 'grid' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1500px]:grid-cols-5 gap-6 mb-8">
+                      {dashboardProducts.map(product => (
+                          <DashboardProductCard 
+                              key={product.id} 
+                              product={product}
+                              selected={selectedProductIds.has(product.id)}
+                              onSelect={toggleSelectProduct}
+                              onClick={() => handleProductClick(product)}
+                          />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="mb-8">
+                    <ProductListView
+                      products={dashboardProducts}
+                      columns={listColumns}
+                      selectedIds={selectedProductIds}
+                      onToggleSelect={toggleSelectProduct}
+                      onToggleSelectAll={toggleSelectAll}
+                      onProductClick={handleProductClick}
+                    />
+                  </div>
+                )}
 
                 {/* Pagination */}
                 <div className="flex flex-wrap items-center justify-end gap-6 text-sm text-gray-600 dark:text-gray-400">
@@ -295,9 +359,9 @@ function TabButton({ children, active }: { children?: React.ReactNode, active?: 
     )
 }
 
-function IconButton({ children, active }: { children?: React.ReactNode, active?: boolean }) {
+function IconButton({ children, active, onClick, title }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string }) {
     return (
-        <button className={`p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 ${active ? 'text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400'}`}>
+        <button onClick={onClick} title={title} className={`p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 ${active ? 'text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-700' : 'text-gray-500 dark:text-gray-400'}`}>
             {children}
         </button>
     )

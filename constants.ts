@@ -98,7 +98,8 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     subspecies: "Indica",
     strain: "Elderberry",
     feelings: ["Relaxed", "Sleepy", "Calm"],
-    description: "Made with real fruit ingredients and cannabis terpenes. Perfect for winding down."
+    description: "Made with real fruit ingredients and cannabis terpenes. Perfect for winding down.",
+    status: "Active"
   },
   {
     id: "dash_2",
@@ -113,7 +114,8 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     imageUrl: IMAGES.KYND_FLOWER,
     subspecies: "Indica",
     strain: "Blackwater OG",
-    description: "A heavy hitting indica strain known for its relaxation properties."
+    description: "A heavy hitting indica strain known for its relaxation properties.",
+    status: "Active"
   },
   {
     id: "dash_3",
@@ -127,7 +129,8 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     totalMarkets: 2,
     imageUrl: IMAGES.VAPE_PEN,
     subspecies: "Indica",
-    strain: "Northern Lights"
+    strain: "Northern Lights",
+    status: "Inactive"
   },
   {
     id: "dash_4",
@@ -138,7 +141,8 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     subProducts: ["Wyld Peach Hybrid Gummies", "Kynd 1g Pre-Roll"],
     markets: ["NV"],
     totalMarkets: 1,
-    imageUrl: IMAGES.WYLD_GUMMIES
+    imageUrl: IMAGES.WYLD_GUMMIES,
+    status: "Active"
   },
   {
     id: "dash_5",
@@ -150,7 +154,8 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     potency: "78% THC",
     markets: ["CA", "CO", "FL"],
     totalMarkets: 3,
-    imageUrl: IMAGES.CONCENTRATE
+    imageUrl: IMAGES.CONCENTRATE,
+    status: "Inactive"
   },
   {
     id: "dash_6",
@@ -163,6 +168,7 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     markets: ["CA"],
     totalMarkets: 1,
     imageUrl: IMAGES.PRE_ROLLS,
-    subspecies: "Hybrid"
+    subspecies: "Hybrid",
+    status: "Active"
   }
 ];
