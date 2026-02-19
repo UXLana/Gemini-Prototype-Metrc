@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -19,6 +20,11 @@
               emerald: {
                 850: '#1B4D3E', // Custom deep green from the mockup
                 900: '#133D32',
+              },
+              gray: {
+                750: '#2d3748', // Custom gray for dark mode cards
+                850: '#1a202c', // Darker background
+                950: '#0d1117', // Almost black
               }
             }
           },
@@ -28,7 +34,6 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #1B4D3E; /* Deep Green Background */
       }
     </style>
   <script type="importmap">
@@ -43,7 +48,7 @@
 }
 </script>
 </head>
-  <body>
+  <body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div id="root"></div>
   </body>
 </html>

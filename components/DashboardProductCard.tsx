@@ -18,19 +18,19 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
   return (
     <div 
       onClick={onClick}
-      className="bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full cursor-pointer"
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full cursor-pointer"
     >
       
       {/* Image Header Area */}
-      <div className="relative h-56 w-full bg-gray-50 group-hover:opacity-95 transition-opacity">
+      <div className="relative h-56 w-full bg-gray-50 dark:bg-gray-700 group-hover:opacity-95 transition-opacity flex-none">
         {/* Custom Styled Checkbox */}
         <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
-           <div className="relative flex items-center justify-center w-5 h-5 bg-white border border-gray-300 rounded cursor-pointer hover:border-emerald-500 shadow-sm transition-colors group/checkbox">
+           <div className="relative flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:border-emerald-500 shadow-sm transition-colors group/checkbox">
                <input 
                  type="checkbox" 
                  className="peer appearance-none absolute inset-0 w-full h-full cursor-pointer z-10" 
                />
-               <Check size={14} className="text-emerald-600 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+               <Check size={14} className="text-emerald-600 dark:text-emerald-400 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
            </div>
         </div>
 
@@ -53,70 +53,73 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
       </div>
 
       {/* Content Area */}
-      <div className="p-5 flex flex-col flex-1 space-y-4">
-        {/* Title and License */}
-        <div>
-            <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">{product.name}</h3>
-            <p className="text-[11px] text-gray-500 font-mono tracking-wide uppercase">{product.licenseNumber}</p>
+      <div className="p-5 flex flex-col flex-1">
+        {/* Top Content (Grows) */}
+        <div className="flex-1 space-y-4">
+            {/* Title and License */}
+            <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1 leading-tight">{product.name}</h3>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono tracking-wide uppercase">{product.licenseNumber}</p>
+            </div>
+
+            {/* Brands Section */}
+            <div>
+               <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">Brands</p>
+               <div className="flex flex-wrap gap-2">
+                 {product.brands.map(brand => (
+                    <span key={brand} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
+                      {brand}
+                    </span>
+                 ))}
+               </div>
+            </div>
+
+            {/* Middle Section: Category & Potency OR Products included */}
+            <div>
+               <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">
+                  {isBundle ? `Products (${product.subProducts?.length || 0})` : 'Category & potency'}
+               </p>
+               
+               {isBundle ? (
+                 <div className="flex flex-wrap gap-1.5">
+                    {product.subProducts?.slice(0, 3).map((p, i) => (
+                        <span key={i} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {p}
+                        </span>
+                    ))}
+                    {(product.subProducts?.length || 0) > 3 && (
+                        <span className="text-[10px] text-gray-400 pl-1 self-center">+{(product.subProducts?.length || 0) - 3} more</span>
+                    )}
+                 </div>
+               ) : (
+                 <div className="flex flex-wrap gap-2">
+                     {product.category && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {product.category}
+                        </span>
+                     )}
+                     {product.potency && (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {product.potency}
+                        </span>
+                     )}
+                 </div>
+               )}
+            </div>
         </div>
 
-        {/* Brands Section */}
-        <div>
-           <p className="text-[10px] text-gray-400 mb-2 uppercase tracking-wide font-medium">Brands</p>
-           <div className="flex flex-wrap gap-2">
-             {product.brands.map(brand => (
-                <span key={brand} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 text-xs font-medium text-gray-700">
-                  {brand}
-                </span>
-             ))}
-           </div>
-        </div>
-
-        {/* Middle Section: Category & Potency OR Products included */}
-        <div>
-           <p className="text-[10px] text-gray-400 mb-2 uppercase tracking-wide font-medium">
-              {isBundle ? `Products (${product.subProducts?.length || 0})` : 'Category & potency'}
-           </p>
-           
-           {isBundle ? (
-             <div className="flex flex-wrap gap-1.5">
-                {product.subProducts?.slice(0, 3).map((p, i) => (
-                    <span key={i} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 text-xs font-medium text-gray-700">
-                        {p}
-                    </span>
-                ))}
-                {(product.subProducts?.length || 0) > 3 && (
-                    <span className="text-[10px] text-gray-400 pl-1 self-center">+{(product.subProducts?.length || 0) - 3} more</span>
-                )}
-             </div>
-           ) : (
-             <div className="flex flex-wrap gap-2">
-                 {product.category && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 text-xs font-medium text-gray-700">
-                        {product.category}
-                    </span>
-                 )}
-                 {product.potency && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 text-xs font-medium text-gray-700">
-                        {product.potency}
-                    </span>
-                 )}
-             </div>
-           )}
-        </div>
-
-        {/* Markets Footer */}
-        <div className="mt-auto pt-2">
-            <p className="text-[10px] text-gray-400 mb-2 uppercase tracking-wide font-medium">Markets</p>
+        {/* Markets Footer - Pinned to bottom */}
+        <div className="mt-6 pt-2">
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">Markets</p>
             <div className="flex items-center justify-between">
                 <div className="flex flex-wrap gap-1.5">
                     {product.markets.slice(0, 2).map(m => (
-                        <span key={m} className="inline-flex items-center px-2 py-0.5 rounded bg-[#DCFCE7] text-[#166534] text-[10px] font-bold">
+                        <span key={m} className="inline-flex items-center px-2 py-0.5 rounded bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] text-[10px] font-bold">
                             {m}
                         </span>
                     ))}
                 </div>
-                <span className="text-[11px] text-gray-500 font-medium">
+                <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                     {product.markets.length}/{product.totalMarkets} Markets
                 </span>
             </div>

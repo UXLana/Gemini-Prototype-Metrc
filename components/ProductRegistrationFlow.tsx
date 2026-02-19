@@ -120,15 +120,9 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
           setView(ViewState.EDIT);
         }
       } else if (view === ViewState.MARKET_SELECTION) {
-        // When moving from Market Selection to Edit, update the product's markets
         if (manualProduct) {
             setManualProduct({...manualProduct, markets: selectedMarkets});
         }
-        // Note: For existing MOCK products we can't easily mutate the const array in place without deep cloning, 
-        // but for visual purposes in EditView, we can pass these markets down or the EditView reads from selectedProduct.
-        // In a real app we'd dispatch an update.
-        // For now, let's rely on the EditView receiving the 'selectedMarkets' if we pass it, 
-        // or we modify the selectedProduct object before render. 
         setView(ViewState.EDIT);
       }
     }
@@ -154,6 +148,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
         }
       }
       if (e.key === 'Escape') {
+        // In EDIT view, we might want to confirm before closing or let the Cancel button handle it
+        // For now, if not in Edit, close.
         if (view !== ViewState.EDIT) {
           onClose();
         }
@@ -200,171 +196,170 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     : selectedProduct;
 
   // Dynamic sizing for the modal container
-  const containerMaxWidth = 'max-w-5xl min-h-[650px] max-h-[90vh]';
+  // Adjusted to ensure it fits within viewport with margin (never touches top/bottom)
+  const isEditView = view === ViewState.EDIT;
+  const containerMaxWidth = isEditView
+    ? 'max-w-6xl h-[85vh] min-h-[500px]' 
+    : 'max-w-5xl h-[85vh] min-h-[500px]';
 
-  // Render Edit View as full screen overlay
-  if (view === ViewState.EDIT && productForEdit) {
-    return (
-        <div className="fixed inset-0 w-full h-full bg-white z-[60] overflow-hidden flex flex-col animate-in fade-in duration-300">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#1B4D3E]/95 backdrop-blur-sm animate-in fade-in duration-200">
+      
+      {/* Modal Container */}
+      <div className={`w-full ${containerMaxWidth} bg-[#F9FAFB] dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative`}>
+        
+        {isEditView && productForEdit ? (
             <EditProductView 
                 product={productForEdit}
                 onSave={handleSaveProduct}
                 onCancel={handleCancel}
             />
-        </div>
-    );
-  }
-
-  // Render Search/Confirm/Market Views inside the dark green overlay
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#1B4D3E]/95 backdrop-blur-sm animate-in fade-in duration-200">
-      
-      {/* Modal Container */}
-      <div className={`w-full ${containerMaxWidth} bg-[#F9FAFB] rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative`}>
-        
-        {/* Close Button absolute top right */}
-        <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 z-10 transition-colors"
-        >
-            <X size={20} />
-        </button>
-
-        {/* Header */}
-        <div className="px-10 pt-10 pb-2 bg-white border-b border-gray-100 shadow-sm z-20">
-          <div className="flex items-center gap-3 mb-2">
-            {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
-                <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 transition-colors">
-                    <ArrowLeft size={24} />
+        ) : (
+            <>
+                {/* Close Button - Only show here if NOT in edit view (Edit view has its own in header) */}
+                <button 
+                    onClick={onClose}
+                    className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 z-10 transition-colors"
+                >
+                    <X size={20} />
                 </button>
-            )}
-            <h1 className="text-2xl font-bold text-gray-900">Find or create new product</h1>
-          </div>
-          <p className="text-gray-500 text-sm mb-6">Look for the product in Metrc database of create a new one</p>
 
-          {/* Search Input - Only visible in SEARCH view */}
-          {view === ViewState.SEARCH && (
-             <div className="relative group shrink-0 mb-8">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
-                </div>
-                <input
-                  type="text"
-                  className="block w-full pl-11 pr-10 py-3.5 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:placeholder-gray-300 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all duration-200 text-base shadow-sm"
-                  placeholder="Start typing license number or product name..."
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={handleClearSearch}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-          )}
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 px-10 py-6 overflow-y-auto custom-scrollbar bg-[#F9FAFB] relative">
-          
-          {view === ViewState.SEARCH && (
-            <div className="h-full flex flex-col">
-              
-              {/* Zero State */}
-              {!searchQuery && products.length === 0 && (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300">
-                   <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-100">
-                      <Search size={32} className="text-gray-300" />
-                   </div>
-                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Search for a product</h3>
-                   <p className="text-gray-500 text-center max-w-xs leading-relaxed">
-                      Enter the product name or license number to search the Metrc database.
-                   </p>
-                </div>
-              )}
-
-              {/* Use Case 2: No Results Found State - NICE MESSAGE */}
-              {isNoResults && (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-8 animate-in fade-in">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-5">
-                      <Search className="text-gray-400" size={28} />
+                {/* Header */}
+                <div className="px-10 pt-10 pb-2 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 shadow-sm z-20">
+                  <div className="flex items-center gap-3 mb-2">
+                    {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
+                        <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                            <ArrowLeft size={24} />
+                        </button>
+                    )}
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Find or create new product</h1>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">No matches found</h3>
-                  <p className="text-gray-500 max-w-sm leading-relaxed mb-6">
-                      We couldn't find "<span className="font-semibold text-gray-900">{searchQuery}</span>" in the Metrc database. 
-                  </p>
-                  <p className="text-sm text-gray-400">You can create a new product entry below.</p>
-                </div>
-              )}
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Look for the product in Metrc database of create a new one</p>
 
-              {/* Search Results List */}
-              {products.length > 0 && (
-                  <div className="space-y-4 pb-4">
-                    {products.map((product) => (
-                      <ProductCard 
-                        key={product.id}
-                        product={product}
-                        isSelected={selectedProductId === product.id}
-                        onSelect={setSelectedProductId}
-                        onDoubleClick={() => handleCardDoubleClick(product.id)}
-                        variant="list"
+                  {/* Search Input - Only visible in SEARCH view */}
+                  {view === ViewState.SEARCH && (
+                     <div className="relative group shrink-0 mb-8">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                          <Search className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
+                        </div>
+                        <input
+                          type="text"
+                          className="block w-full pl-11 pr-10 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:placeholder-gray-300 dark:focus:placeholder-gray-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all duration-200 text-base shadow-sm text-gray-900 dark:text-white"
+                          placeholder="Start typing license number or product name..."
+                          value={searchQuery}
+                          onChange={handleSearch}
+                          autoFocus
+                        />
+                        {searchQuery && (
+                          <button 
+                            onClick={handleClearSearch}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                  )}
+                </div>
+
+                {/* Content Area */}
+                <div className="flex-1 px-10 py-6 overflow-y-auto custom-scrollbar bg-[#F9FAFB] dark:bg-gray-900 relative transition-colors">
+                  
+                  {view === ViewState.SEARCH && (
+                    <div className="h-full flex flex-col">
+                      
+                      {/* Zero State */}
+                      {!searchQuery && products.length === 0 && (
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300">
+                           <div className="w-20 h-20 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                              <Search size={32} className="text-gray-300 dark:text-gray-600" />
+                           </div>
+                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Search for a product</h3>
+                           <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs leading-relaxed">
+                              Enter the product name or license number to search the Metrc database.
+                           </p>
+                        </div>
+                      )}
+
+                      {/* No Results Found State */}
+                      {isNoResults && (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center py-8 animate-in fade-in">
+                          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-5">
+                              <Search className="text-gray-400 dark:text-gray-500" size={28} />
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No matches found</h3>
+                          <p className="text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">
+                              We couldn't find "<span className="font-semibold text-gray-900 dark:text-white">{searchQuery}</span>" in the Metrc database. 
+                          </p>
+                          <p className="text-sm text-gray-400 dark:text-gray-500">You can create a new product entry below.</p>
+                        </div>
+                      )}
+
+                      {/* Search Results List */}
+                      {products.length > 0 && (
+                          <div className="space-y-4 pb-4">
+                            {products.map((product) => (
+                              <ProductCard 
+                                key={product.id}
+                                product={product}
+                                isSelected={selectedProductId === product.id}
+                                onSelect={setSelectedProductId}
+                                onDoubleClick={() => handleCardDoubleClick(product.id)}
+                                variant="list"
+                              />
+                            ))}
+                          </div>
+                      )}
+                    </div>
+                  )}
+
+                  {view === ViewState.CONFIRM && selectedProduct && (
+                    <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col items-center h-full justify-center">
+                       <div className="w-full">
+                          <ProductCard 
+                            product={selectedProduct}
+                            isSelected={true}
+                            variant="standalone"
+                            onRemove={handleRemoveSelection}
+                          />
+                       </div>
+                    </div>
+                  )}
+
+                  {/* MARKET SELECTION VIEW */}
+                  {view === ViewState.MARKET_SELECTION && selectedProduct && (
+                      <MarketSelectionView 
+                         product={selectedProduct} 
+                         onSelectMarkets={setSelectedMarkets}
                       />
-                    ))}
-                  </div>
-              )}
-            </div>
-          )}
+                  )}
 
-          {view === ViewState.CONFIRM && selectedProduct && (
-            <div className="py-4 animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col items-center h-full justify-center">
-               <div className="w-full">
-                  <ProductCard 
-                    product={selectedProduct}
-                    isSelected={true}
-                    variant="standalone"
-                    onRemove={handleRemoveSelection}
-                  />
-               </div>
-            </div>
-          )}
+                </div>
 
-          {/* MARKET SELECTION VIEW */}
-          {view === ViewState.MARKET_SELECTION && selectedProduct && (
-              <MarketSelectionView 
-                 product={selectedProduct} 
-                 onSelectMarkets={setSelectedMarkets}
-              />
-          )}
-
-        </div>
-
-        {/* Footer Actions */}
-        <div className="px-10 py-6 bg-white border-t border-gray-100 mt-auto flex justify-between items-center z-20">
-          <Button variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-          
-          <Button 
-            variant="primary" 
-            disabled={
-                (view === ViewState.SEARCH && !selectedProductId && !isNoResults) || 
-                (view === ViewState.MARKET_SELECTION && !canProceedFromMarketSelection) ||
-                isGenerating
-            }
-            onClick={handleNext}
-            isLoading={isGenerating}
-            className={`px-8 transition-all ${isNoResults ? 'min-w-[200px]' : 'min-w-[120px]'}`}
-          >
-            {isNoResults ? (
-               <span className="flex items-center gap-2"><Plus size={16} /> Create new product entry</span>
-            ) : "Next"}
-          </Button>
-        </div>
-
+                {/* Footer Actions */}
+                <div className="px-10 py-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 mt-auto flex justify-between items-center z-20 transition-colors">
+                  <Button variant="secondary" onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                  
+                  <Button 
+                    variant="primary" 
+                    disabled={
+                        (view === ViewState.SEARCH && !selectedProductId && !isNoResults) || 
+                        (view === ViewState.MARKET_SELECTION && !canProceedFromMarketSelection) ||
+                        isGenerating
+                    }
+                    onClick={handleNext}
+                    isLoading={isGenerating}
+                    className={`px-8 transition-all ${isNoResults ? 'min-w-[200px]' : 'min-w-[120px]'}`}
+                  >
+                    {isNoResults ? (
+                       <span className="flex items-center gap-2"><Plus size={16} /> Create new product entry</span>
+                    ) : "Next"}
+                  </Button>
+                </div>
+            </>
+        )}
       </div>
     </div>
   );
