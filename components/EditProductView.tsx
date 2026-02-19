@@ -187,11 +187,10 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             
             {/* LEFT: FORM SECTION */}
             <div className={`
-                w-full p-6 lg:pl-16 lg:pr-8 
-                pt-8 lg:pt-8 lg:pb-12
-                xl:pl-24 xl:pr-8
-                flex flex-col items-end 
-                ${activeTab === 'edit' ? 'flex' : 'hidden'} lg:flex 
+                w-full p-6 lg:px-12
+                pt-[40px] lg:pt-[40px] lg:pb-12
+                grid items-end 
+                ${activeTab === 'edit' ? 'grid' : 'hidden'} lg:grid 
                 bg-white dark:bg-gray-800 
                 lg:order-1 transition-colors
             `}>
@@ -452,13 +451,13 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             </div>
 
             {/* RIGHT: CUSTOMER PREVIEW SECTION */}
-            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`} style={{ minHeight: '100%' }}>
+            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-row flex-wrap items-start justify-start w-full h-fit pt-8 pb-8 px-12 gap-y-0 lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:grid lg:order-2 transition-colors`} style={{ minHeight: '100%' }}>
               <div className="
                   sticky top-16 
                   flex flex-col items-center lg:items-start 
-                  pt-[40px] pb-10 
+                  pt-8 pb-10 
                   px-6 lg:pb-12 lg:px-12 
-                  h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar
+                  w-full h-full overflow-y-auto custom-scrollbar
               ">
                 <CustomerPreview
                   formData={formData}

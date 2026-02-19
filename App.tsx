@@ -201,7 +201,7 @@ export default function App() {
                 </button>
             </div>
 
-            <nav className={`flex-1 py-4 space-y-1 px-2`}>
+            <nav className="flex-1 py-4 space-y-1 px-2 h-full">
                 <NavItem icon={<Home size={20} />} label="Home" collapsed={!isSidebarOpen} />
                 <NavItem icon={<Box size={20} />} label="Products" active collapsed={!isSidebarOpen} />
                 <NavItem icon={<Layers size={20} />} label="Integrations" collapsed={!isSidebarOpen} />
