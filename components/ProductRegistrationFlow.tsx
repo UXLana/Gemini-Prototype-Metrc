@@ -221,22 +221,27 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     ? { ...selectedProduct, markets: selectedMarkets.length > 0 ? selectedMarkets : selectedProduct.markets } 
     : selectedProduct;
 
-  // Dynamic sizing for the modal container
+  // Dynamic sizing/classes for the modal container
   const isEditView = view === ViewState.EDIT;
-  const containerMaxWidth = isEditView
-    ? 'max-w-6xl h-[85vh] min-h-[500px]' 
-    : 'max-w-4xl min-h-[500px] h-auto max-h-[85vh]';
+  
+  const scrimClassName = isEditView
+    ? "fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200" 
+    : "fixed inset-0 z-50 flex items-center justify-center p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200";
+
+  const containerClassName = isEditView
+    ? "w-full h-full bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
+    : "w-full max-w-4xl min-h-[500px] h-auto max-h-[85vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
 
   return (
-    // Scrim: lighter background, click to close
+    // Scrim
     <div 
-        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+        className={scrimClassName}
         onClick={attemptClose}
     >
       
-      {/* Modal Container - Unified Background */}
+      {/* Modal Container */}
       <div 
-        className={`w-full ${containerMaxWidth} bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative`}
+        className={containerClassName}
         onClick={(e) => e.stopPropagation()} // Prevent click propagation to scrim
       >
         

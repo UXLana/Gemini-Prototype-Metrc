@@ -195,7 +195,7 @@ export default function App() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto relative transition-colors">
             <div className="p-8">
-                <div className="mb-8">
+                <div className="mb-8 mt-2">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Products</h1>
                     <p className="text-gray-500 dark:text-gray-400">Here you can manage all your products and bundles</p>
                 </div>
