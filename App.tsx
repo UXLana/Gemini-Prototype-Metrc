@@ -201,7 +201,7 @@ export default function App() {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                     <StatCard label="Have gaps" value="11" icon={<FileText size={20} className="text-gray-400" />} />
                     <StatCard label="Total products" value="74" icon={<Box size={20} className="text-gray-400" />} />
                     <StatCard label="Drafts" value="2" icon={<FileText size={20} className="text-gray-400" />} />
