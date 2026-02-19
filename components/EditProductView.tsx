@@ -183,7 +183,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
 
       <div className="flex-1 overflow-hidden w-full">
         <div className="h-full overflow-y-auto custom-scrollbar w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-1 min-h-full w-full">
             
             {/* LEFT: FORM SECTION */}
             <div className={`
@@ -452,7 +452,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             </div>
 
             {/* RIGHT: CUSTOMER PREVIEW SECTION */}
-            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors h-fit`}>
+            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`} style={{ minHeight: '100%' }}>
               <div className="
                   sticky top-16 
                   flex flex-col items-center lg:items-start 

@@ -178,7 +178,7 @@ export default function App() {
                 w-[85vw] sm:w-[50vw]
                 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
 
-                md:sticky md:top-0 md:translate-x-0 md:shadow-none md:z-auto md:h-[calc(100vh-64px)] md:self-start
+                md:relative md:translate-x-0 md:shadow-none md:z-auto md:overflow-y-auto
                 ${isSidebarOpen ? 'md:w-64' : 'md:w-[68px]'}
             `}
         >
@@ -237,7 +237,7 @@ export default function App() {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto relative transition-colors">
-            <div className="p-4 md:p-8">
+            <div className="p-4 md:p-8 max-w-[1900px] mx-auto w-full">
                 <div className="mb-8 mt-2">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Products</h1>
                     <p className="text-gray-500 dark:text-gray-400">Here you can manage all your products and bundles</p>
@@ -280,7 +280,7 @@ export default function App() {
                 </div>
 
                 {/* Product Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1500px]:grid-cols-5 gap-6 mb-8">
                     {dashboardProducts.map(product => (
                         <DashboardProductCard 
                             key={product.id} 

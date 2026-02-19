@@ -21,8 +21,8 @@
   /* ───── Form elements ───── */
 
   .form-label {
-    @apply block text-[10px] font-bold text-gray-400 dark:text-gray-500
-           uppercase tracking-widest mb-1.5;
+    @apply block text-xs font-medium text-black/60 dark:text-white/70
+           tracking-[0.2px] mb-1.5;
   }
 
   .form-input {
@@ -30,7 +30,7 @@
            rounded-md text-sm
            focus:ring-1 focus:ring-brand-500 outline-none
            bg-white dark:bg-gray-700
-           text-gray-900 dark:text-white
+           text-black/80 dark:text-white/80
            placeholder-gray-400 dark:placeholder-gray-500
            transition-colors;
   }
@@ -40,7 +40,7 @@
            rounded-md text-sm appearance-none
            focus:ring-1 focus:ring-brand-500 outline-none
            bg-white dark:bg-gray-700
-           text-gray-900 dark:text-white
+           text-black/80 dark:text-white/80
            placeholder-gray-400 dark:placeholder-gray-500
            transition-colors;
   }
