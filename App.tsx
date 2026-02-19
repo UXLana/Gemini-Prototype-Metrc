@@ -86,6 +86,7 @@ export default function App() {
         strain: dashProduct.strain || ""
     };
     setSelectedProduct(product);
+    setIsRegistrationModalOpen(false);
   };
 
   const handleProductSave = (updatedProduct: Product) => {

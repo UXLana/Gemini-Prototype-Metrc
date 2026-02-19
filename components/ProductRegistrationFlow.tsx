@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Sparkles, ArrowLeft, Plus, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Search, X, Sparkles, ArrowLeft, Plus, AlertCircle } from 'lucide-react';
 import { Product, ViewState } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import { ProductCard } from './ProductCard';
 import { Button } from './Button';
+import { ConfirmDialog } from './ConfirmDialog';
 import { EditProductView } from './EditProductView';
 import { MarketSelectionView } from './MarketSelectionView';
 import { generateProductFromDescription } from '../services/geminiService';
@@ -213,7 +214,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
   const containerClassName = isEditView
     ? "w-full h-[100dvh] bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
-    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] md:translate-x-[100px] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
+    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
 
   return (
     <div 
@@ -343,7 +344,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                 </div>
 
-                <div className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
+                <div className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shrink-0 shadow-none">
                   <Button variant="secondary" onClick={handleCancel}>
                     Cancel
                   </Button>
@@ -365,34 +366,16 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                   </Button>
                 </div>
 
-                {showExitConfirmation && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-6 max-w-sm w-full transform scale-100">
-                            <div className="flex items-start gap-4 mb-4">
-                                <div className="bg-warning-icon-bg dark:bg-warning-surface p-2 rounded-full shrink-0">
-                                    <AlertTriangle className="text-warning dark:text-warning-text" size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Discard changes?</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                                        You will lose all data entered for this product. Are you sure you want to close?
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex justify-end gap-3">
-                                <Button variant="secondary" onClick={cancelExit} className="px-4 py-2">
-                                    Keep editing
-                                </Button>
-                                <button 
-                                    onClick={confirmExit}
-                                    className="px-4 py-2 rounded-2xl text-sm font-medium bg-important-action hover:bg-important-action-hover text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-important"
-                                >
-                                    Discard & Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <ConfirmDialog
+                  open={showExitConfirmation}
+                  title="Discard changes?"
+                  description="You will lose all data entered for this product. Are you sure you want to close?"
+                  confirmLabel="Discard & Close"
+                  cancelLabel="Keep editing"
+                  variant="warning"
+                  onConfirm={confirmExit}
+                  onCancel={cancelExit}
+                />
             </>
         )}
       </div>

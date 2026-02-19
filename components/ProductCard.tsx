@@ -36,11 +36,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
 
             <div className="flex flex-col md:flex-row w-full h-full">
-                <div className="w-full md:w-5/12 bg-gray-50 dark:bg-gray-800 relative min-h-[250px] md:min-h-0 p-4 flex items-center justify-center">
+                <div className="w-full md:w-5/12 relative min-h-[250px] md:min-h-0">
                      <img 
                         src={product.imageUrl} 
                         alt={product.name} 
-                        className="w-full h-full object-cover rounded-xl shadow-sm"
+                        className="w-full h-full object-cover"
                         onError={handleImageError}
                      />
                 </div>

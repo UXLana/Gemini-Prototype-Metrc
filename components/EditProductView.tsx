@@ -35,6 +35,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
   const [marketSearch, setMarketSearch] = useState('');
   const marketRef = useRef<HTMLDivElement>(null);
 
+  const [feelingsFlip, setFeelingsFlip] = useState(false);
+  const [marketFlip, setMarketFlip] = useState(false);
+
   const [formData, setFormData] = useState({
     name: product.name || "",
     brand: product.brand || "",
@@ -109,6 +112,23 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     m.name.toLowerCase().includes(marketSearch.toLowerCase()) || 
     m.id.toLowerCase().includes(marketSearch.toLowerCase())
   );
+
+  const shouldFlipDropdown = (ref: React.RefObject<HTMLDivElement | null>, dropdownHeight = 240): boolean => {
+    if (!ref.current) return false;
+    const rect = ref.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    return spaceBelow < dropdownHeight;
+  };
+
+  const toggleFeelings = () => {
+    if (!isFeelingsOpen) setFeelingsFlip(shouldFlipDropdown(feelingsRef));
+    setIsFeelingsOpen(!isFeelingsOpen);
+  };
+
+  const toggleMarketDropdown = () => {
+    if (!isMarketOpen) setMarketFlip(shouldFlipDropdown(marketRef));
+    setIsMarketOpen(!isMarketOpen);
+  };
 
   const handleFileClick = () => fileInputRef.current?.click();
 
@@ -189,12 +209,12 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             <div className={`
                 w-full p-6 lg:px-12
                 pt-[40px] lg:pt-[40px] lg:pb-12
-                flex flex-col items-end 
+                flex flex-col items-center lg:items-end 
                 ${activeTab === 'edit' ? 'flex' : 'hidden'} lg:flex 
                 bg-white dark:bg-gray-800 
                 lg:order-1 transition-colors
             `}>
-              <div className="w-full max-w-[500px] ml-auto">
+              <div className="w-full max-w-[500px] mx-auto lg:ml-auto lg:mr-0">
                 <div className="mb-8 lg:mb-10">
                   <h1 className="text-2xl font-bold mb-2">Edit product</h1>
                   <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Here you can register your product and preview how it will appear to customers.</p>
@@ -288,7 +308,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                       <label className="form-label">Feelings (optional)</label>
                       
                       <div 
-                        onClick={() => setIsFeelingsOpen(!isFeelingsOpen)}
+                        onClick={toggleFeelings}
                         className={`form-input cursor-pointer flex justify-between items-center ${isFeelingsOpen ? 'ring-1 ring-brand-500 border-brand-500' : ''}`}
                       >
                          <span className={formData.feelings.length === 0 ? "text-gray-400" : "text-gray-900 dark:text-white truncate pr-2"}>
@@ -301,7 +321,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                       </div>
 
                       {isFeelingsOpen && (
-                        <div className="dropdown-menu max-h-60 overflow-y-auto">
+                        <div className={`dropdown-menu max-h-60 overflow-y-auto ${feelingsFlip ? 'bottom-full mb-1 mt-0' : ''}`}>
                             {FEELING_OPTIONS.map(option => {
                                 const isSelected = formData.feelings.includes(option);
                                 return (
@@ -389,7 +409,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                         <label className="form-label">Market</label>
                         
                         <div 
-                            onClick={() => setIsMarketOpen(!isMarketOpen)}
+                            onClick={toggleMarketDropdown}
                             className={`form-input cursor-pointer flex justify-between items-center ${isMarketOpen ? 'ring-1 ring-brand-500 border-brand-500' : ''}`}
                         >
                             <span className={formData.markets.length === 0 ? "text-gray-400" : "text-gray-900 dark:text-white truncate pr-2"}>
@@ -399,7 +419,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                         </div>
 
                         {isMarketOpen && (
-                            <div className="dropdown-menu max-h-60 flex flex-col">
+                            <div className={`dropdown-menu max-h-60 flex flex-col ${marketFlip ? 'bottom-full mb-1 mt-0' : ''}`}>
                                 <div className="p-2 border-b border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-t-md">
                                     <div className="relative">
                                         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -451,7 +471,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             </div>
 
             {/* RIGHT: CUSTOMER PREVIEW SECTION */}
-            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-row flex-wrap items-start justify-start w-full h-fit pt-0 pb-0 px-12 gap-y-0 lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:grid lg:order-2 transition-colors`} style={{ minHeight: '100%' }}>
+            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-row flex-wrap items-start justify-start w-full pt-0 pb-0 px-12 gap-y-0 lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:grid lg:order-2 transition-colors min-h-full`}>
               <div className="
                   sticky top-16 
                   flex flex-col items-center lg:items-start 
