@@ -189,8 +189,8 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             <div className={`
                 w-full p-6 lg:px-12
                 pt-[40px] lg:pt-[40px] lg:pb-12
-                grid items-end 
-                ${activeTab === 'edit' ? 'grid' : 'hidden'} lg:grid 
+                flex flex-col items-end 
+                ${activeTab === 'edit' ? 'flex' : 'hidden'} lg:flex 
                 bg-white dark:bg-gray-800 
                 lg:order-1 transition-colors
             `}>
