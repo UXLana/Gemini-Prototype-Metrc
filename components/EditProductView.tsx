@@ -223,7 +223,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
           </button>
           <h2 className="text-sm font-medium text-gray-900 dark:text-white">{formData.name || 'New Product'}</h2>
         </div>
-        <Button onClick={handleSave} className="bg-[#2D7A65] hover:bg-[#236351] text-white px-5 py-2 rounded-lg text-xs font-bold shadow-sm">
+        <Button onClick={handleSave} className="bg-[#2D7A65] hover:bg-[#236351] text-white px-5 py-2 text-xs font-bold shadow-sm">
           Save
         </Button>
       </div>
@@ -632,7 +632,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                         <p className="text-[10px] font-bold text-gray-500 mb-2">Active Markets</p>
                         <div className="flex gap-1.5 flex-wrap">
                           {formData.markets.map(m => (
-                            <span key={m} className="inline-block px-2.5 py-1 bg-[#E8F5F1] text-[#1B4D3E] rounded text-[10px] font-bold border border-[#D1EBE5]">{m}</span>
+                            <span key={m} className="inline-block px-2.5 py-1 bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] rounded text-[10px] font-bold border border-[#DCFCE7] dark:border-[#065f46]">{m}</span>
                           ))}
                         </div>
                       </div>

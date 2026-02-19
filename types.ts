@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -27,6 +28,11 @@ export interface DashboardProduct {
   markets: string[];
   totalMarkets: number;
   imageUrl: string;
+  // Extended fields for detail view consistency
+  subspecies?: string;
+  strain?: string;
+  feelings?: string[];
+  description?: string;
 }
 
 export enum ViewState {

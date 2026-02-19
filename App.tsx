@@ -43,10 +43,10 @@ export default function App() {
         markets: dashProduct.markets,
         totalMarkets: dashProduct.totalMarkets,
         imageUrl: dashProduct.imageUrl,
-        feelings: [], // Default as empty for dashboard view
-        description: "", // Default
-        subspecies: "",
-        strain: ""
+        feelings: dashProduct.feelings || [], 
+        description: dashProduct.description || "", 
+        subspecies: dashProduct.subspecies || "",
+        strain: dashProduct.strain || ""
     };
     setSelectedProduct(product);
   };
@@ -62,7 +62,11 @@ export default function App() {
                 potency: updatedProduct.potency,
                 markets: updatedProduct.markets,
                 totalMarkets: updatedProduct.markets.length,
-                imageUrl: updatedProduct.imageUrl // Save the new image URL
+                imageUrl: updatedProduct.imageUrl, // Save the new image URL
+                subspecies: updatedProduct.subspecies,
+                strain: updatedProduct.strain,
+                feelings: updatedProduct.feelings,
+                description: updatedProduct.description
             };
         }
         return p;
@@ -74,7 +78,8 @@ export default function App() {
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200`}>
       {/* Top Header - Full Width */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30 h-16 shrink-0 transition-colors">
-        <div className="flex items-center gap-2">
+        {/* Left Section: Menu, Grip, User */}
+        <div className="flex items-center gap-2 shrink-0 min-w-[200px]">
             <button 
                 onClick={() => setSidebarOpen(!isSidebarOpen)}
                 className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -88,7 +93,7 @@ export default function App() {
                 <Grip size={20} />
             </button>
             
-            {/* Jane Doe (User) - Left side */}
+            {/* Jane Doe (User) */}
             <button className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors group ml-1">
                  <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[10px] border border-emerald-200 shadow-sm">
                     JD
@@ -98,8 +103,9 @@ export default function App() {
             </button>
         </div>
 
-        <div className="flex items-center gap-4 flex-1 justify-end ml-8">
-            <div className="flex-1 max-w-xl relative hidden md:block">
+        {/* Center Section: Search Bar */}
+        <div className="flex-1 flex justify-center px-4 lg:px-8">
+            <div className="w-full max-w-xl relative hidden md:block">
                 <input 
                 type="text" 
                 placeholder="Find or ask about a product or integration" 
@@ -109,42 +115,49 @@ export default function App() {
                     <Search size={16} />
                 </div>
             </div>
+        </div>
 
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 pl-2">
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"><Bell size={20} /></button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"><HelpCircle size={20} /></button>
-                
-                {/* Canopy (Org) - Moved to Right Side */}
-                <div className="flex items-center gap-2 px-1.5 ml-2">
-                    <div className="w-6 h-6 rounded bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
-                        <img 
-                            src="https://ui-avatars.com/api/?name=Canopy&background=0D8ABC&color=fff" 
-                            alt="Org" 
-                            className="w-full h-full opacity-90"
-                        />
-                    </div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">Canopy</span>
+        {/* Right Section: Icons & Org */}
+        <div className="flex items-center justify-end gap-2 text-gray-500 dark:text-gray-400 shrink-0 min-w-[200px]">
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"><Bell size={20} /></button>
+            <button 
+                onClick={() => setIsDarkMode(!isDarkMode)} 
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                title="Toggle Theme"
+            >
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            
+            {/* Canopy (Org) */}
+            <div className="flex items-center gap-2 px-1.5 ml-2">
+                <div className="w-6 h-6 rounded bg-gray-100 flex items-center justify-center border border-gray-200 overflow-hidden">
+                    <img 
+                        src="https://ui-avatars.com/api/?name=Canopy&background=0D8ABC&color=fff" 
+                        alt="Org" 
+                        className="w-full h-full opacity-90"
+                    />
                 </div>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden md:block">Canopy</span>
             </div>
         </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-20'} overflow-y-auto shrink-0 z-20`}>
+        <aside className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[68px]'} overflow-y-auto shrink-0 z-20`}>
             
             {/* Logo Area */}
-            <div className={`p-4 flex items-center gap-3 ${!isSidebarOpen ? 'justify-center' : ''} mb-2`}>
+            <div className={`h-16 flex items-center ${isSidebarOpen ? 'px-4 gap-3' : 'justify-center'} mb-2`}>
                 <div className="w-8 h-8 bg-emerald-800 text-white rounded flex items-center justify-center font-bold text-lg shadow-sm shrink-0 transition-transform hover:scale-105">
                     <Box size={20} />
                 </div>
-                <div className={`overflow-hidden transition-all duration-300 flex flex-col justify-center ${isSidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
+                <div className={`overflow-hidden transition-all duration-300 flex flex-col justify-center ${isSidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden'}`}>
                     <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">GCR</h2>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">Global Cannabis Registry</p>
                 </div>
             </div>
 
-            <nav className="flex-1 px-3 py-4 space-y-1">
+            <nav className={`flex-1 py-4 space-y-1 px-2`}>
                 <NavItem icon={<Home size={20} />} label="Home" collapsed={!isSidebarOpen} />
                 <NavItem icon={<Box size={20} />} label="Products" active collapsed={!isSidebarOpen} />
                 <NavItem icon={<Layers size={20} />} label="Integrations" collapsed={!isSidebarOpen} />
@@ -153,16 +166,6 @@ export default function App() {
             {/* Bottom Controls */}
             <div className={`p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 transition-all space-y-3 ${!isSidebarOpen ? 'flex flex-col items-center justify-center' : ''}`}>
                 
-                {/* Dark Mode Toggle */}
-                <button 
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  className={`flex items-center gap-3 p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors w-full ${!isSidebarOpen ? 'justify-center' : ''}`}
-                  title="Toggle Dark Mode"
-                >
-                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-                    {isSidebarOpen && <span className="text-xs font-medium">Theme</span>}
-                </button>
-
                 {isSidebarOpen ? (
                     <div className="space-y-2">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 truncate">Prototype Mode</label>
@@ -208,7 +211,8 @@ export default function App() {
                 {/* Toolbar */}
                 <div className="flex flex-col gap-2 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex gap-6 overflow-x-auto pb-1">
+                        {/* Added ml-2 to move tabs right by 8px */}
+                        <div className="flex gap-6 overflow-x-auto pb-1 ml-2">
                             <TabButton active>All</TabButton>
                             <TabButton>Active</TabButton>
                             <TabButton>Archived</TabButton>
@@ -288,7 +292,7 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode, la
             className={`
                 flex items-center text-sm font-medium rounded-lg transition-all duration-200 group relative
                 ${active ? 'text-emerald-800 dark:text-emerald-400 bg-black/[0.06] dark:bg-white/[0.06]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}
-                ${collapsed ? 'justify-center w-12 h-12 mx-auto gap-0' : 'px-3 py-2 w-full gap-3'}
+                ${collapsed ? 'justify-center w-10 h-10 mx-auto gap-0' : 'px-2 py-2 w-full gap-3'}
             `}
             title={collapsed ? label : undefined}
         >

@@ -1,3 +1,4 @@
+
 import { Product, DashboardProduct } from "./types";
 
 // Helper for consistent high-quality images
@@ -93,7 +94,11 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     potency: "100 mg of THC",
     markets: ["CA", "NV", "OR", "AZ", "MI"],
     totalMarkets: 5,
-    imageUrl: IMAGES.WYLD_GUMMIES
+    imageUrl: IMAGES.WYLD_GUMMIES,
+    subspecies: "Indica",
+    strain: "Elderberry",
+    feelings: ["Relaxed", "Sleepy", "Calm"],
+    description: "Made with real fruit ingredients and cannabis terpenes. Perfect for winding down."
   },
   {
     id: "dash_2",
@@ -105,7 +110,10 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     potency: "24% THC",
     markets: ["NV", "FL"],
     totalMarkets: 2,
-    imageUrl: IMAGES.KYND_FLOWER
+    imageUrl: IMAGES.KYND_FLOWER,
+    subspecies: "Indica",
+    strain: "Blackwater OG",
+    description: "A heavy hitting indica strain known for its relaxation properties."
   },
   {
     id: "dash_3",
@@ -117,7 +125,9 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     potency: "90% THC",
     markets: ["CA", "NY"],
     totalMarkets: 2,
-    imageUrl: IMAGES.VAPE_PEN
+    imageUrl: IMAGES.VAPE_PEN,
+    subspecies: "Indica",
+    strain: "Northern Lights"
   },
   {
     id: "dash_4",
@@ -152,6 +162,7 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     potency: "20% THC",
     markets: ["CA"],
     totalMarkets: 1,
-    imageUrl: IMAGES.PRE_ROLLS
+    imageUrl: IMAGES.PRE_ROLLS,
+    subspecies: "Hybrid"
   }
 ];

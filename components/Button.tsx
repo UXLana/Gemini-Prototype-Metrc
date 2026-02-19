@@ -13,7 +13,7 @@ export const Button: React.FC<ButtonProps> = ({
   isLoading,
   ...props 
 }) => {
-  const baseStyles = "px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  const baseStyles = "px-6 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
   
   const variants = {
     primary: "bg-[#2D7A65] hover:bg-[#236351] text-white focus:ring-[#2D7A65]", // Adjusted to match the specific green in mockup
