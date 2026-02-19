@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Trash2, ChevronDown, ChevronUp, X, Image as ImageIcon, Check, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, Trash2, ChevronDown, ChevronUp, X, Check, Search } from 'lucide-react';
 import { Product } from '../types';
 import { Button } from './Button';
+import { CustomerPreview } from './CustomerPreview';
 import { ALL_MARKETS } from '../constants';
 
 interface EditProductViewProps {
@@ -27,16 +28,13 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Feelings Dropdown State
   const [isFeelingsOpen, setIsFeelingsOpen] = useState(false);
   const feelingsRef = useRef<HTMLDivElement>(null);
 
-  // Market Dropdown State
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const [marketSearch, setMarketSearch] = useState('');
   const marketRef = useRef<HTMLDivElement>(null);
 
-  // Initialize form with product data
   const [formData, setFormData] = useState({
     name: product.name || "",
     brand: product.brand || "",
@@ -50,7 +48,6 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     markets: product.markets || []
   });
 
-  // Track the active preview image
   const [previewImage, setPreviewImage] = useState<string>(product.imageUrl);
 
   const initialFiles = product.imageUrl ? [
@@ -59,11 +56,17 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
 
   const [uploadedFiles, setUploadedFiles] = useState(initialFiles);
 
-  // Slideshow Touch State
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  useEffect(() => {
+    if (uploadedFiles.length > 0) {
+      const hasMatchingFile = uploadedFiles.some(file => file.thumb === previewImage);
+      if (!hasMatchingFile) {
+        setPreviewImage(uploadedFiles[0].thumb);
+      }
+    } else if (product.imageUrl && !previewImage) {
+      setPreviewImage(product.imageUrl);
+    }
+  }, [uploadedFiles, previewImage, product.imageUrl]);
 
-  // Click outside handlers
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (feelingsRef.current && !feelingsRef.current.contains(event.target as Node)) {
@@ -86,11 +89,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     setFormData(prev => {
       const current = prev.feelings;
       const exists = current.includes(feeling);
-      if (exists) {
-        return { ...prev, feelings: current.filter(f => f !== feeling) };
-      } else {
-        return { ...prev, feelings: [...current, feeling] };
-      }
+      return exists
+        ? { ...prev, feelings: current.filter(f => f !== feeling) }
+        : { ...prev, feelings: [...current, feeling] };
     });
   };
 
@@ -98,11 +99,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     setFormData(prev => {
         const current = prev.markets;
         const exists = current.includes(marketId);
-        if (exists) {
-            return { ...prev, markets: current.filter(m => m !== marketId) };
-        } else {
-            return { ...prev, markets: [...current, marketId] };
-        }
+        return exists
+          ? { ...prev, markets: current.filter(m => m !== marketId) }
+          : { ...prev, markets: [...current, marketId] };
     });
   };
 
@@ -111,25 +110,16 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
     m.id.toLowerCase().includes(marketSearch.toLowerCase())
   );
 
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
-  };
+  const handleFileClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-        // Create a fake URL for the uploaded file to preview it
         const objectUrl = URL.createObjectURL(file);
-        
-        // Update state
         setPreviewImage(objectUrl);
         setUploadedFiles(prev => [
             ...prev,
-            {
-                name: file.name,
-                size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-                thumb: objectUrl
-            }
+            { name: file.name, size: (file.size / (1024 * 1024)).toFixed(2) + ' MB', thumb: objectUrl }
         ]);
     }
   };
@@ -137,76 +127,23 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
   const handleDeleteFile = (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
-    
-    // If we deleted the current preview, revert to default or empty
     if (newFiles.length === 0) {
         setPreviewImage("");
     } else {
-        // Switch to the previous image if available
         setPreviewImage(newFiles[newFiles.length - 1].thumb);
     }
-  };
-
-  // Slideshow Navigation Handlers
-  const handleNextImage = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (uploadedFiles.length <= 1) return;
-    const currentIndex = uploadedFiles.findIndex(f => f.thumb === previewImage);
-    const nextIndex = (currentIndex + 1) % uploadedFiles.length;
-    setPreviewImage(uploadedFiles[nextIndex].thumb);
-  };
-
-  const handlePrevImage = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (uploadedFiles.length <= 1) return;
-    const currentIndex = uploadedFiles.findIndex(f => f.thumb === previewImage);
-    const prevIndex = (currentIndex - 1 + uploadedFiles.length) % uploadedFiles.length;
-    setPreviewImage(uploadedFiles[prevIndex].thumb);
-  };
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-    
-    if (isLeftSwipe) handleNextImage();
-    if (isRightSwipe) handlePrevImage();
   };
 
   const handleSave = () => {
     const updatedProduct: Product = {
         ...product,
-        name: formData.name,
-        brand: formData.brand,
-        category: formData.category,
-        subspecies: formData.subspecies,
-        strain: formData.strain,
-        potency: formData.potency,
-        feelings: formData.feelings,
-        description: formData.description,
-        upc: formData.upc,
-        markets: formData.markets,
+        ...formData,
         totalMarkets: formData.markets.length,
         imageUrl: previewImage
     };
     onSave(updatedProduct);
   };
 
-  // Common styling for inputs to ensure white background
-  const inputStyle = "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-1 focus:ring-emerald-600 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors";
-  const labelStyle = "block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5";
-
-  // Formatted market text
   const getMarketText = () => {
       if (formData.markets.length === 0) return "Select Market";
       const names = formData.markets.map(id => ALL_MARKETS.find(m => m.id === id)?.name || id);
@@ -223,7 +160,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
           </button>
           <h2 className="text-sm font-medium text-gray-900 dark:text-white hidden sm:block">{formData.name || 'New Product'}</h2>
         </div>
-        <Button onClick={handleSave} className="bg-[#2D7A65] hover:bg-[#236351] text-white px-5 py-2 text-xs font-bold shadow-sm">
+        <Button onClick={handleSave} className="px-5 py-2 text-xs font-bold shadow-sm">
           Save
         </Button>
       </div>
@@ -231,32 +168,24 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
       {/* Mobile Tab Switcher */}
       <div className="lg:hidden flex border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-40">
         <button 
-          className={`flex-1 py-4 text-xs font-bold transition-colors ${activeTab === 'edit' ? 'text-emerald-800 dark:text-emerald-400 border-b-2 border-emerald-800 dark:border-emerald-400' : 'text-gray-400'}`}
+          className={`flex-1 py-4 text-xs font-bold transition-colors ${activeTab === 'edit' ? 'text-brand-700 dark:text-brand-400 border-b-2 border-brand-700 dark:border-brand-400' : 'text-gray-400'}`}
           onClick={() => setActiveTab('edit')}
         >
           Edit product
         </button>
         <button 
-          className={`flex-1 py-4 text-xs font-bold transition-colors ${activeTab === 'preview' ? 'text-emerald-800 dark:text-emerald-400 border-b-2 border-emerald-800 dark:border-emerald-400' : 'text-gray-400'}`}
+          className={`flex-1 py-4 text-xs font-bold transition-colors ${activeTab === 'preview' ? 'text-brand-700 dark:text-brand-400 border-b-2 border-brand-700 dark:border-brand-400' : 'text-gray-400'}`}
           onClick={() => setActiveTab('preview')}
         >
           Customer preview
         </button>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto custom-scrollbar">
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
+      <div className="flex-1 overflow-hidden w-full">
+        <div className="h-full overflow-y-auto custom-scrollbar w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full w-full">
             
-            {/* LEFT: FORM SECTION (Order 1) */}
-            {/* 
-                Layout Update:
-                - pt-[40px] enforced
-                - xl:items-end (Aligns right towards center)
-                - xl:pr-[100px] (100px padding to create 200px gap)
-                - xl:pl-6 (Standard left padding)
-            */}
+            {/* LEFT: FORM SECTION */}
             <div className={`
                 p-6 lg:px-12 
                 pt-[40px] lg:pt-[40px] lg:pb-12
@@ -273,18 +202,17 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                 </div>
 
                 <div className="space-y-6">
-                  {/* Inputs */}
                   <div className="space-y-4">
                     <div>
-                      <label className={labelStyle}>Name</label>
-                      <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Product Name" className={inputStyle} />
+                      <label className="form-label">Name</label>
+                      <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Product Name" className="form-input" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={labelStyle}>Brand</label>
+                        <label className="form-label">Brand</label>
                         <div className="relative">
-                          <select name="brand" value={formData.brand} onChange={handleInputChange} className={`${inputStyle} appearance-none`}>
+                          <select name="brand" value={formData.brand} onChange={handleInputChange} className="form-select">
                             <option value="">Select Brand</option>
                             <option value="Wyld">Wyld</option>
                             <option value="Kynd">Kynd</option>
@@ -296,9 +224,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                         </div>
                       </div>
                       <div>
-                        <label className={labelStyle}>Category</label>
+                        <label className="form-label">Category</label>
                         <div className="relative">
-                          <select name="category" value={formData.category} onChange={handleInputChange} className={`${inputStyle} appearance-none`}>
+                          <select name="category" value={formData.category} onChange={handleInputChange} className="form-select">
                             <option value="">Select Category</option>
                             <option value="Flower">Flower</option>
                             <option value="Edibles">Edibles</option>
@@ -313,9 +241,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={labelStyle}>Subspecies</label>
+                        <label className="form-label">Subspecies</label>
                         <div className="relative">
-                          <select name="subspecies" value={formData.subspecies} onChange={handleInputChange} className={`${inputStyle} appearance-none`}>
+                          <select name="subspecies" value={formData.subspecies} onChange={handleInputChange} className="form-select">
                             <option value="">Select Subspecies</option>
                             <option value="Sativa">Sativa</option>
                             <option value="Indica">Indica</option>
@@ -325,9 +253,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                         </div>
                       </div>
                       <div>
-                        <label className={labelStyle}>Strain</label>
+                        <label className="form-label">Strain</label>
                         <div className="relative">
-                          <select name="strain" value={formData.strain} onChange={handleInputChange} className={`${inputStyle} appearance-none`}>
+                          <select name="strain" value={formData.strain} onChange={handleInputChange} className="form-select">
                             <option value="">Select Strain</option>
                             <option value="Hybrid">Hybrid</option>
                             <option value="Raspberry">Raspberry</option>
@@ -341,9 +269,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                     </div>
 
                     <div>
-                      <label className={labelStyle}>Potency</label>
+                      <label className="form-label">Potency</label>
                       <div className="relative">
-                        <select name="potency" value={formData.potency} onChange={handleInputChange} className={`${inputStyle} appearance-none`}>
+                        <select name="potency" value={formData.potency} onChange={handleInputChange} className="form-select">
                           <option value="">Select Potency</option>
                           <option value="10 mg of THC">10 mg of THC</option>
                           <option value="100 mg of THC">100 mg of THC</option>
@@ -358,12 +286,11 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                     </div>
 
                     <div className="relative" ref={feelingsRef}>
-                      <label className={labelStyle}>Feelings (optional)</label>
+                      <label className="form-label">Feelings (optional)</label>
                       
-                      {/* Custom Dropdown Trigger */}
                       <div 
                         onClick={() => setIsFeelingsOpen(!isFeelingsOpen)}
-                        className={`${inputStyle} cursor-pointer flex justify-between items-center ${isFeelingsOpen ? 'ring-1 ring-emerald-600 border-emerald-600' : ''}`}
+                        className={`form-input cursor-pointer flex justify-between items-center ${isFeelingsOpen ? 'ring-1 ring-brand-500 border-brand-500' : ''}`}
                       >
                          <span className={formData.feelings.length === 0 ? "text-gray-400" : "text-gray-900 dark:text-white truncate pr-2"}>
                             {formData.feelings.length > 0 
@@ -374,18 +301,17 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                          {isFeelingsOpen ? <ChevronUp size={14} className="text-gray-400 shrink-0" /> : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
                       </div>
 
-                      {/* Custom Dropdown Menu */}
                       {isFeelingsOpen && (
-                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="dropdown-menu max-h-60 overflow-y-auto">
                             {FEELING_OPTIONS.map(option => {
                                 const isSelected = formData.feelings.includes(option);
                                 return (
                                     <div 
                                         key={option}
                                         onClick={() => toggleFeeling(option)}
-                                        className={`flex items-center px-3 py-2.5 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors ${isSelected ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100' : 'text-gray-700 dark:text-gray-200'}`}
+                                        className={`dropdown-item ${isSelected ? 'dropdown-item-selected' : 'text-gray-700 dark:text-gray-200'}`}
                                     >
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center mr-3 transition-colors ${isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700'}`}>
+                                        <div className={`check-indicator mr-3 ${isSelected ? 'check-indicator-on' : 'check-indicator-off'}`}>
                                             {isSelected && <Check size={10} className="text-white" />}
                                         </div>
                                         {option}
@@ -397,8 +323,8 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                     </div>
 
                     <div>
-                      <label className={labelStyle}>Description</label>
-                      <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Enter a product description..." rows={6} className={`${inputStyle} resize-none leading-relaxed`} />
+                      <label className="form-label">Description</label>
+                      <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Enter a product description..." rows={6} className="form-input resize-none leading-relaxed" />
                       <div className="flex justify-between mt-1">
                         <span className="text-[10px] text-gray-400">Assistive text</span>
                         <span className="text-[10px] text-gray-400">0/30</span>
@@ -411,7 +337,6 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                     <h3 className="text-xl font-bold mb-1">Upload product image</h3>
                     <p className="text-gray-500 dark:text-gray-400 text-xs mb-5">Best practices for product image upload go here</p>
                     
-                    {/* Hidden File Input */}
                     <input 
                         type="file" 
                         ref={fileInputRef} 
@@ -422,11 +347,11 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
 
                     <div 
                         onClick={handleFileClick}
-                        className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-emerald-500 transition-all mb-4 group bg-white dark:bg-gray-800"
+                        className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-brand-500 transition-all mb-4 group bg-white dark:bg-gray-800"
                     >
                       <div className="flex items-center gap-2 mb-1 pointer-events-none">
-                        <Upload size={18} className="text-gray-400 group-hover:text-emerald-600 transition-colors" />
-                        <p className="text-xs text-gray-600 dark:text-gray-300">Drag and drop or <span className="text-emerald-800 dark:text-emerald-400 underline font-semibold">browse files</span></p>
+                        <Upload size={18} className="text-gray-400 group-hover:text-brand-500 transition-colors" />
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Drag and drop or <span className="text-brand-700 dark:text-brand-400 underline font-semibold">browse files</span></p>
                       </div>
                     </div>
 
@@ -442,7 +367,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                                <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase">{file.size}</p>
                              </div>
                           </div>
-                          <button onClick={() => handleDeleteFile(idx)} className="text-gray-300 hover:text-red-500 p-2">
+                          <button onClick={() => handleDeleteFile(idx)} className="text-gray-300 hover:text-important p-2">
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -456,18 +381,17 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                     <p className="text-gray-500 dark:text-gray-400 text-xs mb-5">Microcopy goes here</p>
                     <div className="space-y-4">
                       <div>
-                        <label className={labelStyle}>Inventory UPC (optional)</label>
-                        <input name="upc" value={formData.upc} onChange={handleInputChange} placeholder="UPC Code" className={inputStyle} />
+                        <label className="form-label">Inventory UPC (optional)</label>
+                        <input name="upc" value={formData.upc} onChange={handleInputChange} placeholder="UPC Code" className="form-input" />
                       </div>
                       
-                      {/* Market Multi-Select Dropdown with Search */}
+                      {/* Market Multi-Select Dropdown */}
                       <div className="relative" ref={marketRef}>
-                        <label className={labelStyle}>Market</label>
+                        <label className="form-label">Market</label>
                         
-                        {/* Custom Dropdown Trigger */}
                         <div 
                             onClick={() => setIsMarketOpen(!isMarketOpen)}
-                            className={`${inputStyle} cursor-pointer flex justify-between items-center ${isMarketOpen ? 'ring-1 ring-emerald-600 border-emerald-600' : ''}`}
+                            className={`form-input cursor-pointer flex justify-between items-center ${isMarketOpen ? 'ring-1 ring-brand-500 border-brand-500' : ''}`}
                         >
                             <span className={formData.markets.length === 0 ? "text-gray-400" : "text-gray-900 dark:text-white truncate pr-2"}>
                                 {getMarketText()}
@@ -475,10 +399,8 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                             {isMarketOpen ? <ChevronUp size={14} className="text-gray-400 shrink-0" /> : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
                         </div>
 
-                        {/* Dropdown Content */}
                         {isMarketOpen && (
-                            <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-60 flex flex-col">
-                                {/* Search Bar Fixed at Top - Explicitly Light Mode */}
+                            <div className="dropdown-menu max-h-60 flex flex-col">
                                 <div className="p-2 border-b border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-t-md">
                                     <div className="relative">
                                         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -489,12 +411,11 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                                             value={marketSearch}
                                             onChange={(e) => setMarketSearch(e.target.value)}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-md focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-gray-700 dark:text-gray-200 placeholder-gray-400"
+                                            className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 rounded-md focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 text-gray-700 dark:text-gray-200 placeholder-gray-400"
                                         />
                                     </div>
                                 </div>
                                 
-                                {/* Scrollable List */}
                                 <div className="overflow-y-auto flex-1 p-1">
                                     {filteredMarkets.length > 0 ? filteredMarkets.map(market => {
                                         const isSelected = formData.markets.includes(market.id);
@@ -502,10 +423,9 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                                             <div 
                                                 key={market.id}
                                                 onClick={() => toggleMarket(market.id)}
-                                                className={`flex items-center px-3 py-2 cursor-pointer text-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors ${isSelected ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100' : 'text-gray-700 dark:text-gray-200'}`}
+                                                className={`dropdown-item ${isSelected ? 'dropdown-item-selected' : 'text-gray-700 dark:text-gray-200'}`}
                                             >
-                                                {/* Checkbox Style - Light Mode */}
-                                                <div className={`w-4 h-4 rounded border flex items-center justify-center mr-3 transition-colors ${isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700'}`}>
+                                                <div className={`check-indicator mr-3 ${isSelected ? 'check-indicator-on' : 'check-indicator-off'}`}>
                                                     {isSelected && <Check size={10} className="text-white" />}
                                                 </div>
                                                 <div className="flex-1 flex justify-between">
@@ -523,7 +443,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                       </div>
 
                       <div className="pt-6">
-                        <button className="text-red-700 dark:text-red-400 text-xs font-bold hover:underline">Archive product</button>
+                        <button className="text-important-text dark:text-important text-xs font-bold hover:underline">Archive product</button>
                       </div>
                     </div>
                   </div>
@@ -531,17 +451,8 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
               </div>
             </div>
 
-            {/* RIGHT: CUSTOMER PREVIEW SECTION (Order 2) */}
-            <div className={`bg-[#F9FAFB] dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`}>
-              
-              {/* Sticky Container */}
-              {/* 
-                  Layout Update:
-                  - pt-[40px] enforced
-                  - xl:items-start (Aligns left towards center)
-                  - xl:pl-[100px] (100px padding to create 200px gap)
-                  - xl:pr-6 (Standard right padding)
-              */}
+            {/* RIGHT: CUSTOMER PREVIEW SECTION */}
+            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`}>
               <div className="
                   sticky top-16 
                   flex flex-col items-center xl:items-start 
@@ -550,138 +461,12 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                   xl:pl-[100px] xl:pr-6 
                   h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar
               ">
-                  <div className="w-full max-w-[480px]">
-                    <div className="mb-6">
-                      <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">Customer preview</h2>
-                      <p className="text-gray-500 dark:text-gray-400 text-xs">Product information people see when they scan the barcode</p>
-                    </div>
-
-                    {/* iPhone-style Preview Card */}
-                    <div className="bg-white rounded-[24px] border border-gray-100 overflow-hidden flex flex-col shadow-sm">
-                      <div className="p-8 pb-4">
-                        <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest mb-1">{formData.brand || 'BRAND'}</p>
-                        <h3 className="text-xl font-bold text-gray-900 leading-tight">{formData.name || 'Product Name'}</h3>
-                        <p className="text-[10px] text-gray-500 mt-1">Count: 10</p>
-                      </div>
-
-                      <div 
-                        className="px-8 mb-6 relative flex flex-col items-center group"
-                      >
-                        <div 
-                            className="w-full aspect-[1/0.85] rounded-xl overflow-hidden mb-4 bg-gray-50/50 flex items-center justify-center border border-gray-50 relative isolate"
-                            onTouchStart={onTouchStart}
-                            onTouchMove={onTouchMove}
-                            onTouchEnd={onTouchEnd}
-                        >
-                          {uploadedFiles.length > 0 ? (
-                             uploadedFiles.map((file, idx) => (
-                                 <img 
-                                    key={file.thumb} // Using thumb URL as key to ensure uniqueness
-                                    src={file.thumb} 
-                                    alt="" 
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${previewImage === file.thumb ? 'opacity-100 z-10' : 'opacity-0 z-0'}`} 
-                                 />
-                             ))
-                          ) : (
-                             <div className="text-gray-300 flex flex-col items-center z-20">
-                                <ImageIcon size={48} className="mb-2 opacity-50" />
-                                <span className="text-xs font-medium">No Image</span>
-                             </div>
-                          )}
-                          
-                          {/* Left/Right Arrows for Slideshow - On Top Layer */}
-                          {uploadedFiles.length > 1 && (
-                            <div className="absolute inset-0 z-20 flex items-center justify-between px-2 pointer-events-none">
-                                <button 
-                                    onClick={handlePrevImage}
-                                    className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
-                                >
-                                    <ChevronLeft size={18} className="text-gray-800" />
-                                </button>
-                                <button 
-                                    onClick={handleNextImage}
-                                    className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
-                                >
-                                    <ChevronRight size={18} className="text-gray-800" />
-                                </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Functional Slideshow Dots */}
-                        {uploadedFiles.length > 0 && (
-                          <div className="flex gap-1.5 z-10">
-                            {uploadedFiles.map((file, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => setPreviewImage(file.thumb)}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${
-                                  previewImage === file.thumb 
-                                    ? 'w-5 bg-gray-800' 
-                                    : 'w-1.5 bg-gray-200 hover:bg-gray-300'
-                                }`}
-                                aria-label={`View image ${idx + 1}`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="px-8 pb-8 space-y-6">
-                        <div className="grid grid-cols-4 gap-2">
-                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Category</p>
-                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.category || '—'}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Subspecies</p>
-                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.subspecies || '—'}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Strain</p>
-                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.strain || '—'}</p>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Potency</p>
-                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.potency || '—'}</p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-500 mb-2">Feelings</p>
-                          <div className="flex flex-wrap gap-2">
-                            {formData.feelings.length > 0 ? formData.feelings.map((f, i) => (
-                              <span key={i} className={`px-2 py-1 text-[10px] font-bold rounded ${i === 0 ? 'bg-emerald-50 text-emerald-800' : 'bg-pink-50 text-pink-700'}`}>
-                                {f}
-                              </span>
-                            )) : <span className="text-[10px] text-gray-300 italic">No feelings specified</span>}
-                          </div>
-                        </div>
-
-                        {/* Display Selected Markets in Preview if available */}
-                        {formData.markets && formData.markets.length > 0 && (
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-500 mb-2">Active Markets</p>
-                            <div className="flex gap-1.5 flex-wrap">
-                              {formData.markets.map(m => (
-                                <span key={m} className="inline-block px-2.5 py-1 bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] rounded text-[10px] font-bold border border-[#DCFCE7] dark:border-[#065f46]">{m}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div>
-                          <h4 className="text-sm font-bold text-gray-900 mb-3">Details</h4>
-                          <div className="space-y-4">
-                            {/* Increased Text Size to text-sm */}
-                            <p className="text-sm text-gray-500 leading-relaxed">
-                              {formData.description || "Enter a description to see it here."}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <CustomerPreview
+                  formData={formData}
+                  images={uploadedFiles}
+                  activeImage={previewImage}
+                  onImageChange={setPreviewImage}
+                />
               </div>
             </div>
 

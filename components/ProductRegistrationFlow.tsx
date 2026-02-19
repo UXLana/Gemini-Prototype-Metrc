@@ -5,7 +5,7 @@ import { MOCK_PRODUCTS } from '../constants';
 import { ProductCard } from './ProductCard';
 import { Button } from './Button';
 import { EditProductView } from './EditProductView';
-import { MarketSelectionView } from './MarketSelectionView'; // Import new component
+import { MarketSelectionView } from './MarketSelectionView';
 import { generateProductFromDescription } from '../services/geminiService';
 import { UseCase } from '../App';
 
@@ -16,7 +16,6 @@ interface ProductRegistrationFlowProps {
 }
 
 export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase, onSave }) => {
-  // Application State
   const [view, setView] = useState<ViewState>(ViewState.SEARCH);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -25,34 +24,26 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   const [isGenerating, setIsGenerating] = useState(false);
   const [manualProduct, setManualProduct] = useState<Product | null>(null);
   
-  // Exit Confirmation State
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
 
-  // State for Use Case 3
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
 
-  // Derived State
   const selectedProduct = manualProduct || products.find(p => p.id === selectedProductId);
   const isNoResults = isTyping && products.length === 0 && !isGenerating && searchQuery.length > 0;
 
-  // If we are in Market Selection, we need to know if the user has selected at least one to enable "Next"
   const canProceedFromMarketSelection = view === ViewState.MARKET_SELECTION && selectedMarkets.length > 0;
 
-  // Handlers
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
     
-    // Reset selection if user types again
     if (selectedProductId) {
         setSelectedProductId(null);
     }
 
     if (query.length > 0) {
       setIsTyping(true);
-      // Simulate API search latency slightly for realism
       setTimeout(() => {
-        // UseCase 2 Logic: Always return empty if Mode is 'empty-search'
         if (useCase === 'empty-search') {
           setProducts([]);
         } else {
@@ -87,7 +78,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
       potency: "",
       markets: [],
       totalMarkets: 0,
-      imageUrl: "", // Empty image for manual creation
+      imageUrl: "",
       description: ""
     };
     setManualProduct(freshProduct);
@@ -97,10 +88,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   const handleGenerateWithAI = async () => {
     if (!searchQuery) return;
     setIsGenerating(true);
-    // Use the Gemini service to "create" a product based on the search query as a description
     const newProduct = await generateProductFromDescription(searchQuery);
     if (newProduct) {
-      // Prepend to products list and select it
       setProducts(prev => [newProduct, ...prev]);
       setSelectedProductId(newProduct.id);
     }
@@ -117,7 +106,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
       if (view === ViewState.SEARCH) {
         setView(ViewState.CONFIRM);
       } else if (view === ViewState.CONFIRM) {
-        // Use Case 3 Logic: Go to Market Selection instead of Edit directly
         if (useCase === 'market-selection') {
           setView(ViewState.MARKET_SELECTION);
         } else {
@@ -132,7 +120,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     }
   }, [selectedProductId, view, isNoResults, searchQuery, useCase, selectedMarkets, manualProduct]);
 
-  // Back Handler
   const handleBack = () => {
     if (view === ViewState.CONFIRM) {
         setView(ViewState.SEARCH);
@@ -141,7 +128,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     }
   };
 
-  // Close / Cancel logic with confirmation
   const attemptClose = () => {
     const hasData = searchQuery.length > 0 || selectedProductId !== null || selectedMarkets.length > 0;
     
@@ -161,13 +147,11 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     setShowExitConfirmation(false);
   };
 
-  // Keyboard navigation support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         if (showExitConfirmation) {
             e.preventDefault();
-            // Optional: Confirm exit on Enter? usually better to make them click
         } else if ((view === ViewState.SEARCH || view === ViewState.CONFIRM) && (selectedProductId || isNoResults)) {
           handleNext();
         } else if (view === ViewState.MARKET_SELECTION && canProceedFromMarketSelection) {
@@ -217,35 +201,28 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     onClose();
   };
 
-  // Prepare product with updated markets if coming from Market Selection
   const productForEdit = selectedProduct 
     ? { ...selectedProduct, markets: selectedMarkets.length > 0 ? selectedMarkets : selectedProduct.markets } 
     : selectedProduct;
 
-  // Dynamic sizing/classes for the modal container
   const isEditView = view === ViewState.EDIT;
   
-  // Scrim Class: Remove padding on mobile to allow full width/height
   const scrimClassName = isEditView
     ? "fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200" 
     : "fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200";
 
-  // Container Class: w-full h-[100dvh] on mobile to prevent address bar overlap, rounded/sized on desktop
   const containerClassName = isEditView
     ? "w-full h-[100dvh] bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
-    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
+    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] md:translate-x-[100px] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
 
   return (
-    // Scrim
     <div 
         className={scrimClassName}
         onClick={attemptClose}
     >
-      
-      {/* Modal Container */}
       <div 
         className={containerClassName}
-        onClick={(e) => e.stopPropagation()} // Prevent click propagation to scrim
+        onClick={(e) => e.stopPropagation()}
       >
         
         {isEditView && productForEdit ? (
@@ -256,7 +233,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
             />
         ) : (
             <>
-                {/* Close Button */}
                 <button 
                     onClick={attemptClose}
                     className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 z-50 transition-colors"
@@ -264,7 +240,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                     <X size={20} />
                 </button>
 
-                {/* Header Section (Unified BG) */}
                 <div className="px-5 md:px-10 pt-6 md:pt-8 pb-2 z-20 shrink-0">
                   <div className="flex items-center gap-3 mb-1">
                     {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
@@ -277,20 +252,18 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">Look for the product in Metrc database of create a new one</p>
                 </div>
 
-                {/* Content Area - Added min-h-0 for proper flex scrolling */}
                 <div className="flex-1 px-5 md:px-10 py-6 overflow-y-auto custom-scrollbar relative transition-colors flex flex-col min-h-0">
                   
                   {view === ViewState.SEARCH && (
                     <div className="h-full flex flex-col">
 
-                       {/* Search Input - Moved to Body */}
                       <div className="relative group shrink-0 mb-6 mt-2">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Search className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
+                          <Search className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
                         </div>
                         <input
                           type="text"
-                          className="block w-full pl-11 pr-10 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:placeholder-gray-300 dark:focus:placeholder-gray-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 transition-all duration-200 text-sm shadow-sm text-gray-900 dark:text-white"
+                          className="block w-full pl-11 pr-10 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:placeholder-gray-300 dark:focus:placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 text-sm shadow-sm text-gray-900 dark:text-white"
                           placeholder="Start typing license number or product name..."
                           value={searchQuery}
                           onChange={handleSearch}
@@ -306,7 +279,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                         )}
                       </div>
                       
-                      {/* Zero State */}
                       {!searchQuery && products.length === 0 && (
                         <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300 mb-8">
                            <div className="w-14 h-14 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-600">
@@ -319,7 +291,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                         </div>
                       )}
 
-                      {/* No Results Found State */}
                       {isNoResults && (
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-8 animate-in fade-in">
                           <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-5">
@@ -333,7 +304,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                         </div>
                       )}
 
-                      {/* Search Results List */}
                       {products.length > 0 && (
                           <div className="space-y-4 pb-4">
                             {products.map((product) => (
@@ -364,7 +334,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                     </div>
                   )}
 
-                  {/* MARKET SELECTION VIEW */}
                   {view === ViewState.MARKET_SELECTION && selectedProduct && (
                       <MarketSelectionView 
                          product={selectedProduct} 
@@ -374,7 +343,6 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                 </div>
 
-                {/* Footer Actions - Fixed to bottom */}
                 <div className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
                   <Button variant="secondary" onClick={handleCancel}>
                     Cancel
@@ -397,13 +365,12 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                   </Button>
                 </div>
 
-                {/* EXIT CONFIRMATION DIALOG OVERLAY */}
                 {showExitConfirmation && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 p-6 max-w-sm w-full transform scale-100">
                             <div className="flex items-start gap-4 mb-4">
-                                <div className="bg-amber-100 dark:bg-amber-900/30 p-2 rounded-full shrink-0">
-                                    <AlertTriangle className="text-amber-600 dark:text-amber-500" size={24} />
+                                <div className="bg-warning-icon-bg dark:bg-warning-surface p-2 rounded-full shrink-0">
+                                    <AlertTriangle className="text-warning dark:text-warning-text" size={24} />
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Discard changes?</h3>
@@ -418,7 +385,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                                 </Button>
                                 <button 
                                     onClick={confirmExit}
-                                    className="px-4 py-2 rounded-2xl text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors"
+                                    className="px-4 py-2 rounded-2xl text-sm font-medium bg-important-action hover:bg-important-action-hover text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-important"
                                 >
                                     Discard & Close
                                 </button>

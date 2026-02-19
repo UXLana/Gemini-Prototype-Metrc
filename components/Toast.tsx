@@ -22,7 +22,7 @@ export const Toast: React.FC<ToastProps> = ({ message, isVisible, onClose }) => 
   return (
     <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-[100] flex items-center gap-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-4 py-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300 border border-gray-800 dark:border-gray-200 min-w-[300px] justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+        <div className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center shrink-0">
             <Check size={14} className="text-white font-bold" strokeWidth={3} />
         </div>
         <span className="text-sm font-medium">{message}</span>

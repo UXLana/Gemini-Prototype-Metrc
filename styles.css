@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * GCR Design System — Shared Utility Classes
+ *
+ * These @apply classes extract the most-repeated patterns across
+ * components so a single change here propagates everywhere.
+ * Use them as className values in JSX just like any Tailwind class.
+ */
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+
+  /* ───── Form elements ───── */
+
+  .form-label {
+    @apply block text-[10px] font-bold text-gray-400 dark:text-gray-500
+           uppercase tracking-widest mb-1.5;
+  }
+
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+           rounded-md text-sm
+           focus:ring-1 focus:ring-brand-500 outline-none
+           bg-white dark:bg-gray-700
+           text-gray-900 dark:text-white
+           placeholder-gray-400 dark:placeholder-gray-500
+           transition-colors;
+  }
+
+  .form-select {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+           rounded-md text-sm appearance-none
+           focus:ring-1 focus:ring-brand-500 outline-none
+           bg-white dark:bg-gray-700
+           text-gray-900 dark:text-white
+           placeholder-gray-400 dark:placeholder-gray-500
+           transition-colors;
+  }
+
+  /* ───── Card surfaces ───── */
+
+  .card {
+    @apply bg-white dark:bg-gray-800
+           border border-gray-200 dark:border-gray-700
+           rounded-2xl shadow-sm transition-colors;
+  }
+
+  /* ───── Badges (mirrors MTR DLS Badge component) ───── */
+  /* Variants: filled, outlined, subtle                    */
+  /* Colors are set per-use via bg-*, text-*, border-*     */
+
+  .badge-filled {
+    @apply inline-flex items-center gap-1 px-2 py-0.5
+           rounded-lg border text-xs font-medium text-white
+           whitespace-nowrap;
+  }
+
+  .badge-outlined {
+    @apply inline-flex items-center gap-1 px-2 py-0.5
+           rounded-lg border bg-transparent
+           text-xs font-medium whitespace-nowrap;
+  }
+
+  .badge-subtle {
+    @apply inline-flex items-center gap-1 px-2 py-0.5
+           rounded-lg border border-transparent
+           text-xs font-medium whitespace-nowrap;
+  }
+
+  /* Neutral (default) shortcuts */
+  .badge {
+    @apply badge-subtle bg-gray-100 dark:bg-gray-700
+           text-gray-700 dark:text-gray-300;
+  }
+
+  .badge-outline {
+    @apply badge-outlined border-gray-300 dark:border-gray-600
+           text-gray-700 dark:text-gray-300;
+  }
+
+  /* Market badges — brand-colored */
+  .badge-market {
+    @apply badge-subtle bg-brand-50 dark:bg-brand-900
+           text-brand-700 dark:text-brand-300
+           text-[10px] font-bold
+           border border-brand-200 dark:border-brand-850;
+  }
+
+  .badge-market-sm {
+    @apply badge-subtle bg-brand-100 dark:bg-brand-900
+           text-brand-800 dark:text-brand-300
+           text-[10px] font-bold;
+  }
+
+  /* ───── Section labels (inside cards / detail views) ───── */
+
+  .section-label {
+    @apply text-[10px] text-gray-400 dark:text-gray-500
+           uppercase tracking-wider font-semibold mb-2;
+  }
+
+  /* ───── Checkbox / Radio indicators ───── */
+
+  .check-indicator {
+    @apply w-4 h-4 rounded border flex items-center justify-center
+           transition-colors;
+  }
+
+  .check-indicator-on {
+    @apply bg-brand-500 border-brand-500;
+  }
+
+  .check-indicator-off {
+    @apply border-gray-300 dark:border-gray-500
+           bg-white dark:bg-gray-700;
+  }
+
+  /* ───── Dropdown menus ───── */
+
+  .dropdown-menu {
+    @apply absolute z-50 w-full mt-1
+           bg-white dark:bg-gray-700
+           border border-gray-200 dark:border-gray-600
+           rounded-md shadow-lg;
+  }
+
+  .dropdown-item {
+    @apply flex items-center px-3 py-2 cursor-pointer text-sm
+           hover:bg-gray-50 dark:hover:bg-gray-600
+           transition-colors;
+  }
+
+  .dropdown-item-selected {
+    @apply bg-brand-50 dark:bg-brand-900/30
+           text-brand-700 dark:text-brand-300;
+  }
+}

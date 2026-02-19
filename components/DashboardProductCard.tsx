@@ -18,27 +18,26 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
   return (
     <div 
       onClick={onClick}
-      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full cursor-pointer"
+      className="card hover:shadow-lg transition-all duration-300 group relative flex flex-col overflow-hidden h-full cursor-pointer"
     >
       
       {/* Image Header Area */}
       <div className="relative h-56 w-full bg-gray-50 dark:bg-gray-700 group-hover:opacity-95 transition-opacity flex-none">
-        {/* Custom Styled Checkbox */}
         <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
-           <div className="relative flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:border-emerald-500 shadow-sm transition-colors group/checkbox">
+           <div className="relative flex items-center justify-center w-5 h-5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded cursor-pointer hover:border-brand-500 shadow-sm transition-colors group/checkbox">
                <input 
                  type="checkbox" 
                  className="peer appearance-none absolute inset-0 w-full h-full cursor-pointer z-10" 
                />
-               <Check size={14} className="text-emerald-600 dark:text-emerald-400 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+               <Check size={14} className="text-brand-500 dark:text-brand-400 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
            </div>
         </div>
 
         <div className="absolute top-4 right-4 z-10">
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold shadow-sm backdrop-blur-md ${
-            isBundle ? 'bg-[#374151] text-white' : 'bg-[#2D7A65] text-white'
+          <span className={`badge-filled ${
+            isBundle ? 'bg-gray-600 border-gray-600' : 'bg-brand-500 border-brand-500'
           }`}>
-            {isBundle ? <Layers className="w-3.5 h-3.5 mr-1.5" /> : <Package className="w-3.5 h-3.5 mr-1.5" />}
+            {isBundle ? <Layers className="w-3 h-3" /> : <Package className="w-3 h-3" />}
             {product.type}
           </span>
         </div>
@@ -54,38 +53,30 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
 
       {/* Content Area */}
       <div className="p-5 flex flex-col flex-1">
-        {/* Top Content (Grows) */}
         <div className="flex-1 space-y-4">
-            {/* Title and License */}
             <div>
                 <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1 leading-tight">{product.name}</h3>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono tracking-wide uppercase">{product.licenseNumber}</p>
             </div>
 
-            {/* Brands Section */}
             <div>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">Brands</p>
+               <p className="section-label">Brands</p>
                <div className="flex flex-wrap gap-2">
                  {product.brands.map(brand => (
-                    <span key={brand} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
-                      {brand}
-                    </span>
+                    <span key={brand} className="badge">{brand}</span>
                  ))}
                </div>
             </div>
 
-            {/* Middle Section: Category & Potency OR Products included */}
             <div>
-               <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">
+               <p className="section-label">
                   {isBundle ? `Products (${product.subProducts?.length || 0})` : 'Category & potency'}
                </p>
                
                {isBundle ? (
                  <div className="flex flex-wrap gap-1.5">
                     {product.subProducts?.slice(0, 3).map((p, i) => (
-                        <span key={i} className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
-                            {p}
-                        </span>
+                        <span key={i} className="badge">{p}</span>
                     ))}
                     {(product.subProducts?.length || 0) > 3 && (
                         <span className="text-[10px] text-gray-400 pl-1 self-center">+{(product.subProducts?.length || 0) - 3} more</span>
@@ -93,30 +84,20 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
                  </div>
                ) : (
                  <div className="flex flex-wrap gap-2">
-                     {product.category && (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
-                            {product.category}
-                        </span>
-                     )}
-                     {product.potency && (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300">
-                            {product.potency}
-                        </span>
-                     )}
+                     {product.category && <span className="badge">{product.category}</span>}
+                     {product.potency && <span className="badge">{product.potency}</span>}
                  </div>
                )}
             </div>
         </div>
 
-        {/* Markets Footer - Pinned to bottom */}
+        {/* Markets Footer */}
         <div className="mt-6 pt-2">
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-wide font-medium">Markets</p>
+            <p className="section-label">Markets</p>
             <div className="flex items-center justify-between">
                 <div className="flex flex-wrap gap-1.5">
                     {product.markets.slice(0, 2).map(m => (
-                        <span key={m} className="inline-flex items-center px-2 py-0.5 rounded bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] text-[10px] font-bold">
-                            {m}
-                        </span>
+                        <span key={m} className="badge-market-sm">{m}</span>
                     ))}
                 </div>
                 <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">

@@ -16,9 +16,9 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = "px-6 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
   
   const variants = {
-    primary: "bg-[#2D7A65] hover:bg-[#236351] text-white focus:ring-[#2D7A65]", // Adjusted to match the specific green in mockup
-    secondary: "bg-gray-200 hover:bg-gray-300 text-gray-700 focus:ring-gray-400",
-    ghost: "bg-transparent hover:bg-gray-100 text-gray-600"
+    primary: "bg-brand-500 hover:bg-brand-600 text-white focus:ring-brand-500",
+    secondary: "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 focus:ring-gray-400",
+    ghost: "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 focus:ring-gray-400"
   };
 
   return (
