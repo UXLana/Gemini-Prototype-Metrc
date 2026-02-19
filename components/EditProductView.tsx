@@ -187,11 +187,11 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             
             {/* LEFT: FORM SECTION */}
             <div className={`
-                p-6 lg:px-12 
-                pt-[40px] lg:pt-[40px] lg:pb-12
-                xl:pr-[100px] xl:pl-6
-                flex flex-col items-center xl:items-end 
-                ${activeTab === 'edit' ? 'block' : 'hidden'} lg:block 
+                w-full p-6 lg:px-12 
+                pt-8 lg:pt-8 lg:pb-12
+                xl:pr-12 xl:pl-12
+                flex flex-col items-end 
+                ${activeTab === 'edit' ? 'flex' : 'hidden'} lg:flex 
                 bg-white dark:bg-gray-800 
                 lg:order-1 transition-colors
             `}>
@@ -452,7 +452,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             </div>
 
             {/* RIGHT: CUSTOMER PREVIEW SECTION */}
-            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`}>
+            <div className={`bg-gray-50 dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors h-fit`}>
               <div className="
                   sticky top-16 
                   flex flex-col items-center xl:items-start 

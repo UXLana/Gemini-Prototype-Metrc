@@ -150,7 +150,7 @@ export const CustomerPreview: React.FC<CustomerPreviewProps> = ({
         <div className="px-6 pb-6 space-y-4">
           <div className="grid grid-cols-4 gap-2">
             {(['category', 'subspecies', 'strain', 'potency'] as const).map((field) => (
-              <div key={field} className="bg-gray-50 rounded-lg p-3 border border-gray-50">
+              <div key={field} className="bg-gray-50 rounded-lg px-3 py-2 h-full border border-gray-50">
                 <p className="text-[9px] text-gray-400 uppercase mb-1 capitalize">{field}</p>
                 <p className="text-[10px] text-gray-900 leading-tight">{formData[field] || '—'}</p>
               </div>
