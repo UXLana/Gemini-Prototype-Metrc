@@ -32,5 +32,6 @@ export interface DashboardProduct {
 export enum ViewState {
   SEARCH = 'SEARCH',
   CONFIRM = 'CONFIRM',
+  MARKET_SELECTION = 'MARKET_SELECTION',
   EDIT = 'EDIT',
 }

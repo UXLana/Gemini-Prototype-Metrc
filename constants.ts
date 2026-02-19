@@ -2,15 +2,34 @@ import { Product, DashboardProduct } from "./types";
 
 // Helper for consistent high-quality images
 const IMAGES = {
-  WYLD_GUMMIES: "https://images.unsplash.com/photo-1582034986517-30d163aa1da9?auto=format&fit=crop&q=80&w=800", // Gummy bears
-  FLOWER_JAR: "https://images.unsplash.com/photo-1606902965551-dce0b6238b32?auto=format&fit=crop&q=80&w=800", // Dried herbs/flower
-  VAPE_PEN: "https://images.unsplash.com/photo-1520186994231-6ea0019d80a6?auto=format&fit=crop&q=80&w=800", // Abstract smoke/vibe for vape
-  PRE_ROLLS: "https://images.unsplash.com/photo-1555529733-146e499d372f?auto=format&fit=crop&q=80&w=800", // Rolled paper
-  CONCENTRATE: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800", // Honey/oil texture
-  KYND_FLOWER: "https://images.unsplash.com/photo-1536640523419-482a46645367?auto=format&fit=crop&q=80&w=800", // Premium green herbs
-  CHOCOLATE: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?auto=format&fit=crop&q=80&w=800", // Chocolate
-  FALLBACK: "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&q=80&w=800" // Fallback botanical
+  // Colorful gummies that look like Wyld (Fruit gummies on dark or clean background)
+  WYLD_GUMMIES: "https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&q=80&w=800", 
+  // Premium flower jar that looks like Kynd (Glass jar with buds)
+  KYND_FLOWER: "https://images.unsplash.com/photo-1556928045-16f7f50be0f3?auto=format&fit=crop&q=80&w=800",
+  // Vape pen
+  VAPE_PEN: "https://images.unsplash.com/photo-1527661591478-9588939c4a87?auto=format&fit=crop&q=80&w=800",
+  // Pre-roll
+  PRE_ROLLS: "https://images.unsplash.com/photo-1528460033278-a6ba57020470?auto=format&fit=crop&q=80&w=800",
+  // Concentrate
+  CONCENTRATE: "https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?auto=format&fit=crop&q=80&w=800",
+  // Chocolate
+  CHOCOLATE: "https://images.unsplash.com/photo-1511381971708-4122d2122615?auto=format&fit=crop&q=80&w=800",
+  // Fallback
+  FALLBACK: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800"
 };
+
+export const ALL_MARKETS = [
+  { id: 'CA', name: 'California', active: true },
+  { id: 'CO', name: 'Colorado', active: true },
+  { id: 'MI', name: 'Michigan', active: true },
+  { id: 'NV', name: 'Nevada', active: true },
+  { id: 'OR', name: 'Oregon', active: true },
+  { id: 'MA', name: 'Massachusetts', active: true },
+  { id: 'AZ', name: 'Arizona', active: true },
+  { id: 'FL', name: 'Florida', active: true },
+  { id: 'IL', name: 'Illinois', active: true },
+  { id: 'NY', name: 'New York', active: false }, 
+];
 
 export const MOCK_PRODUCTS: Product[] = [
   {
@@ -21,8 +40,8 @@ export const MOCK_PRODUCTS: Product[] = [
     category: "Edibles",
     subspecies: "Sativa",
     strain: "Raspberry",
-    potency: "100mg THC",
-    feelings: ["Energetic", "Focused"],
+    potency: "100 mg of THC", 
+    feelings: ["Inspired", "Energetic"], 
     description: "Made with real fruit and botanical terpenes, these Sativa gummies are great for outdoor adventures.",
     markets: ["CA", "NV", "OR", "CO"],
     totalMarkets: 4,
@@ -53,8 +72,8 @@ export const MOCK_PRODUCTS: Product[] = [
     category: "Edibles",
     subspecies: "Indica",
     strain: "Midnight Blueberry",
-    potency: "5mg THC : 1mg CBN",
-    feelings: ["Sleepy", "Calm"],
+    potency: "10 mg of THC",
+    feelings: ["Relaxed", "Euphoric"],
     description: "Settling in for a quiet night? Let the calming combination of THC and CBN put you to bed.",
     markets: ["CA", "MI", "IL"],
     totalMarkets: 3,
@@ -71,10 +90,10 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     licenseNumber: "WYLD-IND-001",
     brands: ["Wyld"],
     category: "Edibles",
-    potency: "100mg THC",
+    potency: "100 mg of THC",
     markets: ["CA", "NV", "OR", "AZ", "MI"],
     totalMarkets: 5,
-    imageUrl: "https://images.unsplash.com/photo-1600850056064-a8b380df8395?auto=format&fit=crop&q=80&w=800" // Dark berries
+    imageUrl: IMAGES.WYLD_GUMMIES
   },
   {
     id: "dash_2",

@@ -5,6 +5,7 @@ import { MOCK_PRODUCTS } from '../constants';
 import { ProductCard } from './ProductCard';
 import { Button } from './Button';
 import { EditProductView } from './EditProductView';
+import { MarketSelectionView } from './MarketSelectionView'; // Import new component
 import { generateProductFromDescription } from '../services/geminiService';
 import { UseCase } from '../App';
 
@@ -22,10 +23,16 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   const [isTyping, setIsTyping] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [manualProduct, setManualProduct] = useState<Product | null>(null);
+  
+  // State for Use Case 3
+  const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
 
   // Derived State
   const selectedProduct = manualProduct || products.find(p => p.id === selectedProductId);
   const isNoResults = isTyping && products.length === 0 && !isGenerating && searchQuery.length > 0;
+
+  // If we are in Market Selection, we need to know if the user has selected at least one to enable "Next"
+  const canProceedFromMarketSelection = view === ViewState.MARKET_SELECTION && selectedMarkets.length > 0;
 
   // Handlers
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,10 +113,35 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
       if (view === ViewState.SEARCH) {
         setView(ViewState.CONFIRM);
       } else if (view === ViewState.CONFIRM) {
+        // Use Case 3 Logic: Go to Market Selection instead of Edit directly
+        if (useCase === 'market-selection') {
+          setView(ViewState.MARKET_SELECTION);
+        } else {
+          setView(ViewState.EDIT);
+        }
+      } else if (view === ViewState.MARKET_SELECTION) {
+        // When moving from Market Selection to Edit, update the product's markets
+        if (manualProduct) {
+            setManualProduct({...manualProduct, markets: selectedMarkets});
+        }
+        // Note: For existing MOCK products we can't easily mutate the const array in place without deep cloning, 
+        // but for visual purposes in EditView, we can pass these markets down or the EditView reads from selectedProduct.
+        // In a real app we'd dispatch an update.
+        // For now, let's rely on the EditView receiving the 'selectedMarkets' if we pass it, 
+        // or we modify the selectedProduct object before render. 
         setView(ViewState.EDIT);
       }
     }
-  }, [selectedProductId, view, isNoResults, searchQuery]);
+  }, [selectedProductId, view, isNoResults, searchQuery, useCase, selectedMarkets, manualProduct]);
+
+  // Back Handler
+  const handleBack = () => {
+    if (view === ViewState.CONFIRM) {
+        setView(ViewState.SEARCH);
+    } else if (view === ViewState.MARKET_SELECTION) {
+        setView(ViewState.CONFIRM);
+    }
+  };
 
   // Keyboard navigation support
   useEffect(() => {
@@ -117,6 +149,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
       if (e.key === 'Enter') {
         if ((view === ViewState.SEARCH || view === ViewState.CONFIRM) && (selectedProductId || isNoResults)) {
           handleNext();
+        } else if (view === ViewState.MARKET_SELECTION && canProceedFromMarketSelection) {
+            handleNext();
         }
       }
       if (e.key === 'Escape') {
@@ -127,7 +161,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [view, selectedProductId, isNoResults, handleNext, onClose]);
+  }, [view, selectedProductId, isNoResults, handleNext, onClose, canProceedFromMarketSelection]);
 
   const handleCardDoubleClick = (productId: string) => {
     setSelectedProductId(productId);
@@ -139,10 +173,12 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
         setProducts([]);
         setSelectedProductId(null);
         setManualProduct(null);
+        setSelectedMarkets([]);
         setView(ViewState.SEARCH);
         setIsTyping(false);
-    } else if (view === ViewState.CONFIRM) {
+    } else if (view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) {
         setView(ViewState.SEARCH);
+        setSelectedMarkets([]);
     } else {
         onClose();
     }
@@ -158,15 +194,20 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     onClose();
   };
 
+  // Prepare product with updated markets if coming from Market Selection
+  const productForEdit = selectedProduct 
+    ? { ...selectedProduct, markets: selectedMarkets.length > 0 ? selectedMarkets : selectedProduct.markets } 
+    : selectedProduct;
+
   // Dynamic sizing for the modal container
   const containerMaxWidth = 'max-w-5xl min-h-[650px] max-h-[90vh]';
 
   // Render Edit View as full screen overlay
-  if (view === ViewState.EDIT && selectedProduct) {
+  if (view === ViewState.EDIT && productForEdit) {
     return (
         <div className="fixed inset-0 w-full h-full bg-white z-[60] overflow-hidden flex flex-col animate-in fade-in duration-300">
             <EditProductView 
-                product={selectedProduct}
+                product={productForEdit}
                 onSave={handleSaveProduct}
                 onCancel={handleCancel}
             />
@@ -174,7 +215,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     );
   }
 
-  // Render Search/Confirm Views inside the dark green overlay
+  // Render Search/Confirm/Market Views inside the dark green overlay
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#1B4D3E]/95 backdrop-blur-sm animate-in fade-in duration-200">
       
@@ -192,8 +233,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
         {/* Header */}
         <div className="px-10 pt-10 pb-2 bg-white border-b border-gray-100 shadow-sm z-20">
           <div className="flex items-center gap-3 mb-2">
-            {view === ViewState.CONFIRM && (
-                <button onClick={() => setView(ViewState.SEARCH)} className="text-gray-400 hover:text-gray-600 transition-colors">
+            {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
+                <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 transition-colors">
                     <ArrowLeft size={24} />
                 </button>
             )}
@@ -201,7 +242,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
           </div>
           <p className="text-gray-500 text-sm mb-6">Look for the product in Metrc database of create a new one</p>
 
-          {/* Search Input - Always visible in SEARCH view */}
+          {/* Search Input - Only visible in SEARCH view */}
           {view === ViewState.SEARCH && (
              <div className="relative group shrink-0 mb-8">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -290,6 +331,15 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                </div>
             </div>
           )}
+
+          {/* MARKET SELECTION VIEW */}
+          {view === ViewState.MARKET_SELECTION && selectedProduct && (
+              <MarketSelectionView 
+                 product={selectedProduct} 
+                 onSelectMarkets={setSelectedMarkets}
+              />
+          )}
+
         </div>
 
         {/* Footer Actions */}
@@ -300,7 +350,11 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
           
           <Button 
             variant="primary" 
-            disabled={(!selectedProductId && !isNoResults) || isGenerating}
+            disabled={
+                (view === ViewState.SEARCH && !selectedProductId && !isNoResults) || 
+                (view === ViewState.MARKET_SELECTION && !canProceedFromMarketSelection) ||
+                isGenerating
+            }
             onClick={handleNext}
             isLoading={isGenerating}
             className={`px-8 transition-all ${isNoResults ? 'min-w-[200px]' : 'min-w-[120px]'}`}

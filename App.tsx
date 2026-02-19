@@ -8,12 +8,57 @@ import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button } from './components/Button';
+import { Product, DashboardProduct } from './types';
+import { EditProductView } from './components/EditProductView';
 
-export type UseCase = 'standard' | 'empty-search';
+export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
 export default function App() {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [useCase, setUseCase] = useState<UseCase>('standard');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // State for products to allow updates (like image saving)
+  const [dashboardProducts, setDashboardProducts] = useState<DashboardProduct[]>(DASHBOARD_PRODUCTS);
+
+  const handleProductClick = (dashProduct: DashboardProduct) => {
+    // Map DashboardProduct to Product
+    const product: Product = {
+        id: dashProduct.id,
+        name: dashProduct.name,
+        licenseNumber: dashProduct.licenseNumber,
+        brand: dashProduct.brands[0] || '', // Use first brand
+        category: dashProduct.category || '',
+        potency: dashProduct.potency || '',
+        markets: dashProduct.markets,
+        totalMarkets: dashProduct.totalMarkets,
+        imageUrl: dashProduct.imageUrl,
+        feelings: [], // Default as empty for dashboard view
+        description: "", // Default
+        subspecies: "",
+        strain: ""
+    };
+    setSelectedProduct(product);
+  };
+
+  const handleProductSave = (updatedProduct: Product) => {
+    setDashboardProducts(prevProducts => prevProducts.map(p => {
+        if (p.id === updatedProduct.id) {
+            return {
+                ...p,
+                name: updatedProduct.name,
+                brands: [updatedProduct.brand], // Update brand
+                category: updatedProduct.category,
+                potency: updatedProduct.potency,
+                markets: updatedProduct.markets,
+                totalMarkets: updatedProduct.markets.length,
+                imageUrl: updatedProduct.imageUrl // Save the new image URL
+            };
+        }
+        return p;
+    }));
+    setSelectedProduct(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans">
@@ -55,6 +100,7 @@ export default function App() {
             >
               <option value="standard">Use Case 1: Standard</option>
               <option value="empty-search">Use Case 2: Empty Search</option>
+              <option value="market-selection">Use Case 3: Market Selection</option>
             </select>
             <div className="absolute right-2 top-2.5 pointer-events-none text-gray-400">
               <ArrowUpDown size={12} />
@@ -79,7 +125,7 @@ export default function App() {
              <input 
                type="text" 
                placeholder="Find or ask about a product or integration" 
-               className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+               className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm focus:bg-white transition-all"
              />
              <div className="absolute right-3 top-2.5 text-gray-400">
                 <Search size={16} />
@@ -115,7 +161,7 @@ export default function App() {
 
             {/* Toolbar */}
             <div className="flex flex-col gap-4 mb-6">
-               <div className="flex items-center justify-between border-b border-gray-200">
+               <div className="flex items-center justify-between">
                   <div className="flex gap-6">
                       <TabButton active>All</TabButton>
                       <TabButton>Active</TabButton>
@@ -142,9 +188,13 @@ export default function App() {
             </div>
 
             {/* Product Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {DASHBOARD_PRODUCTS.map(product => (
-                    <DashboardProductCard key={product.id} product={product} />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                {dashboardProducts.map(product => (
+                    <DashboardProductCard 
+                        key={product.id} 
+                        product={product} 
+                        onClick={() => handleProductClick(product)}
+                    />
                 ))}
             </div>
 
@@ -167,6 +217,17 @@ export default function App() {
       {/* Registration Modal Overlay */}
       {isRegistrationModalOpen && (
           <ProductRegistrationFlow useCase={useCase} onClose={() => setIsRegistrationModalOpen(false)} />
+      )}
+
+      {/* Detail View Overlay */}
+      {selectedProduct && (
+        <div className="fixed inset-0 w-full h-full bg-white z-[60] overflow-hidden flex flex-col animate-in fade-in duration-300">
+            <EditProductView 
+                product={selectedProduct}
+                onSave={handleProductSave}
+                onCancel={() => setSelectedProduct(null)}
+            />
+        </div>
       )}
     </div>
   );

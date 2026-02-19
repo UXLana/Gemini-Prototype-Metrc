@@ -41,7 +41,7 @@ export const generateProductFromDescription = async (description: string): Promi
       const data = JSON.parse(response.text);
       return {
         ...data,
-        imageUrl: "https://images.unsplash.com/photo-1603909223429-69bb7df01f9c?auto=format&fit=crop&q=80&w=800" // Cannabis flower in jar
+        imageUrl: "https://images.unsplash.com/photo-1563205764-647e29eb4945?auto=format&fit=crop&q=80&w=800" // Cannabis flower in jar
       };
     }
     return null;

@@ -22,7 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const isList = variant === 'list';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&q=80&w=800";
+    e.currentTarget.src = "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800";
     e.currentTarget.onerror = null;
   };
 
