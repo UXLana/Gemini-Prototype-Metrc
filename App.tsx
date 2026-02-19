@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, Bell, HelpCircle, Box, Home, Layers, Plus, 
   Filter, ArrowUpDown, LayoutGrid, List, ChevronLeft, ChevronRight,
-  FileText, Settings, Menu, Grip, ChevronDown, Moon, Sun
+  FileText, Settings, Menu, Grip, ChevronDown, Moon, Sun, X
 } from 'lucide-react';
 import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
@@ -18,7 +18,15 @@ export default function App() {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [useCase, setUseCase] = useState<UseCase>('standard');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Initialize sidebar based on screen width
+  const [isSidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return false; // Default to closed on mobile
+  });
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
   
@@ -84,12 +92,19 @@ export default function App() {
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200`}>
       {/* Top Header - Full Width */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30 h-16 shrink-0 transition-colors">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between sticky top-0 z-30 h-16 shrink-0 transition-colors shadow-sm md:shadow-none">
         {/* Left Section: Menu, Grip, User */}
-        <div className="flex items-center gap-2 shrink-0 min-w-[200px]">
+        <div className="flex items-center gap-2 shrink-0 min-w-[50px] md:min-w-[200px]">
+            <button 
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 md:hidden"
+                aria-label="Open Sidebar"
+            >
+                <Menu size={20} />
+            </button>
             <button 
                 onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 hidden md:block"
                 aria-label="Toggle Sidebar"
             >
                 <Menu size={20} />
@@ -125,7 +140,7 @@ export default function App() {
         </div>
 
         {/* Right Section: Icons & Org */}
-        <div className="flex items-center justify-end gap-2 text-gray-500 dark:text-gray-400 shrink-0 min-w-[200px]">
+        <div className="flex items-center justify-end gap-2 text-gray-500 dark:text-gray-400 shrink-0 min-w-[100px] md:min-w-[200px]">
             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"><Bell size={20} /></button>
             <button 
                 onClick={() => setIsDarkMode(!isDarkMode)} 
@@ -149,19 +164,53 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+        
+        {/* Mobile Scrim Overlay */}
+        <div 
+          className={`
+            fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 md:hidden
+            ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+          `}
+          onClick={() => setSidebarOpen(false)}
+        />
+
         {/* Sidebar */}
-        <aside className={`bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[68px]'} overflow-y-auto shrink-0 z-20`}>
+        <aside 
+            className={`
+                bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col z-50
+                fixed inset-y-0 left-0 
+                transition-all duration-300 ease-in-out
+                
+                /* Mobile Styles */
+                w-[85vw] sm:w-[50vw]
+                ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+
+                /* Desktop Styles Override */
+                md:static md:translate-x-0 md:shadow-none md:z-auto
+                ${isSidebarOpen ? 'md:w-64' : 'md:w-[68px]'}
+            `}
+        >
             
-            {/* Logo Area */}
-            <div className={`h-16 flex items-center ${isSidebarOpen ? 'px-4 gap-3' : 'justify-center'} mb-2`}>
-                <div className="w-8 h-8 bg-emerald-800 text-white rounded flex items-center justify-center font-bold text-lg shadow-sm shrink-0 transition-transform hover:scale-105">
-                    <Box size={20} />
+            {/* Logo Area & Mobile Header */}
+            <div className={`h-16 flex items-center shrink-0 ${isSidebarOpen ? 'px-4 justify-between md:justify-start gap-3' : 'justify-center'} mb-2`}>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-800 text-white rounded flex items-center justify-center font-bold text-lg shadow-sm shrink-0 transition-transform hover:scale-105">
+                        <Box size={20} />
+                    </div>
+                    <div className={`overflow-hidden transition-all duration-300 flex flex-col justify-center ${isSidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden md:hidden'}`}>
+                        <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">GCR</h2>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">Global Cannabis Registry</p>
+                    </div>
                 </div>
-                <div className={`overflow-hidden transition-all duration-300 flex flex-col justify-center ${isSidebarOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden'}`}>
-                    <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">GCR</h2>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">Global Cannabis Registry</p>
-                </div>
+
+                {/* Mobile Close Button */}
+                <button 
+                    onClick={() => setSidebarOpen(false)}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden"
+                >
+                    <X size={20} />
+                </button>
             </div>
 
             <nav className={`flex-1 py-4 space-y-1 px-2`}>
@@ -201,7 +250,7 @@ export default function App() {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto relative transition-colors">
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <div className="mb-8 mt-2">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Products</h1>
                     <p className="text-gray-500 dark:text-gray-400">Here you can manage all your products and bundles</p>

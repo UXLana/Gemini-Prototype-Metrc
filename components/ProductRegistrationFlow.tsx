@@ -225,13 +225,15 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   // Dynamic sizing/classes for the modal container
   const isEditView = view === ViewState.EDIT;
   
+  // Scrim Class: Remove padding on mobile to allow full width/height
   const scrimClassName = isEditView
     ? "fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200" 
-    : "fixed inset-0 z-50 flex items-center justify-center p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200";
+    : "fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200";
 
+  // Container Class: w-full h-[100dvh] on mobile to prevent address bar overlap, rounded/sized on desktop
   const containerClassName = isEditView
-    ? "w-full h-full bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
-    : "w-full max-w-4xl min-h-[500px] h-auto max-h-[85vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
+    ? "w-full h-[100dvh] bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
+    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
 
   return (
     // Scrim
@@ -257,13 +259,13 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                 {/* Close Button */}
                 <button 
                     onClick={attemptClose}
-                    className="absolute top-6 right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 z-10 transition-colors"
+                    className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 z-50 transition-colors"
                 >
                     <X size={20} />
                 </button>
 
                 {/* Header Section (Unified BG) */}
-                <div className="px-10 pt-8 pb-2 z-20">
+                <div className="px-5 md:px-10 pt-6 md:pt-8 pb-2 z-20 shrink-0">
                   <div className="flex items-center gap-3 mb-1">
                     {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
                         <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -275,8 +277,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">Look for the product in Metrc database of create a new one</p>
                 </div>
 
-                {/* Content Area */}
-                <div className="flex-1 px-10 py-6 overflow-y-auto custom-scrollbar relative transition-colors flex flex-col">
+                {/* Content Area - Added min-h-0 for proper flex scrolling */}
+                <div className="flex-1 px-5 md:px-10 py-6 overflow-y-auto custom-scrollbar relative transition-colors flex flex-col min-h-0">
                   
                   {view === ViewState.SEARCH && (
                     <div className="h-full flex flex-col">
@@ -372,8 +374,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                 </div>
 
-                {/* Footer Actions (Unified BG, just spacing) */}
-                <div className="px-10 py-6 mt-auto flex justify-between items-center z-20 transition-colors">
+                {/* Footer Actions - Fixed to bottom */}
+                <div className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-none">
                   <Button variant="secondary" onClick={handleCancel}>
                     Cancel
                   </Button>

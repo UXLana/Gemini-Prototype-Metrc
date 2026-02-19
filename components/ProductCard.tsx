@@ -93,72 +93,110 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       onClick={() => onSelect?.(product.id)}
       onDoubleClick={onDoubleClick}
       className={`
-        relative flex items-start p-4 rounded-2xl border-2 transition-all cursor-pointer group
+        relative flex p-4 rounded-2xl border-2 transition-all cursor-pointer group
         ${isSelected 
           ? 'border-emerald-600 bg-white dark:bg-gray-800 ring-1 ring-emerald-600 shadow-md z-10' 
           : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-md shadow-sm'
         }
       `}
     >
-      {/* Radio Button */}
-      <div className="pt-1 mr-4 shrink-0">
-          <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700 group-hover:border-emerald-400'}`}>
-             {isSelected && <div className="w-2 h-2 bg-white rounded-full shadow-sm" />}
-          </div>
-      </div>
-
-      {/* Image */}
-      <div className="w-20 h-20 shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-600 mr-4 relative shadow-sm">
-        <img 
-            src={product.imageUrl} 
-            alt="" 
-            className="w-full h-full object-cover"
-            onError={handleImageError}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-         <div className="flex justify-between items-start mb-2">
-             <div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-0.5">{product.name}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{product.licenseNumber}</p>
+      <div className="flex flex-col sm:flex-row w-full">
+        
+        {/* Mobile Header: Radio + Image + Title */}
+        <div className="flex sm:hidden w-full mb-4">
+             {/* Radio */}
+             <div className="pt-1 mr-3 shrink-0">
+                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700'}`}>
+                   {isSelected && <div className="w-2 h-2 bg-white rounded-full shadow-sm" />}
+                </div>
              </div>
-             {/* Market Count - Top Right */}
-             <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 ml-4 font-medium">{product.totalMarkets} Markets</span>
-         </div>
+             
+             {/* Image */}
+             <div className="w-16 h-16 shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-600 mr-3 relative shadow-sm">
+                <img 
+                    src={product.imageUrl} 
+                    alt="" 
+                    className="w-full h-full object-cover"
+                    onError={handleImageError}
+                />
+             </div>
 
-         <div className="grid grid-cols-10 gap-4 mt-2">
-            <div className="col-span-3">
-                <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Brands</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-gray-600">
-                    {product.brand}
-                </span>
+             {/* Title */}
+             <div className="flex-1 min-w-0">
+                 <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-1">{product.name}</h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{product.licenseNumber}</p>
+             </div>
+        </div>
+
+        {/* Desktop Left: Radio + Image */}
+        <div className="hidden sm:flex shrink-0">
+           {/* Radio */}
+           <div className="pt-1 mr-4 shrink-0">
+              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isSelected ? 'border-emerald-600 bg-emerald-600' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700 group-hover:border-emerald-400'}`}>
+                 {isSelected && <div className="w-2 h-2 bg-white rounded-full shadow-sm" />}
+              </div>
+           </div>
+
+           {/* Image */}
+           <div className="w-20 h-20 shrink-0 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-600 mr-4 relative shadow-sm">
+             <img 
+                 src={product.imageUrl} 
+                 alt="" 
+                 className="w-full h-full object-cover"
+                 onError={handleImageError}
+             />
+           </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0 w-full">
+            {/* Desktop Title Header */}
+            <div className="hidden sm:flex justify-between items-start mb-2">
+                 <div>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white leading-tight mb-0.5">{product.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{product.licenseNumber}</p>
+                 </div>
+                 <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0 ml-4 font-medium">{product.totalMarkets} Markets</span>
             </div>
             
-            <div className="col-span-4">
-                <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Category & potency</span>
-                <div className="flex flex-wrap gap-1">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-gray-600">
-                        {product.category}
+            {/* Mobile Market Count Separator removed */}
+
+            {/* Details Grid (Responsive) */}
+            <div className="grid grid-cols-1 sm:grid-cols-10 gap-3 sm:gap-4 mt-1 sm:mt-2">
+                 {/* Brand */}
+                 <div className="sm:col-span-3">
+                    <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Brands</span>
+                    <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-gray-600">
+                        {product.brand}
                     </span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium truncate max-w-full border border-gray-200 dark:border-gray-600">
-                        {product.potency}
-                    </span>
-                </div>
-            </div>
-            
-            <div className="col-span-3 flex flex-col items-end">
-                <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Markets</span>
-                <div className="flex gap-1 justify-end">
-                    {product.markets.map(m => (
-                        <span key={m} className="inline-flex items-center px-2 py-0.5 rounded bg-[#E8F5F1] dark:bg-[#064e3b] text-[#1B4D3E] dark:text-[#a7f3d0] text-[10px] font-bold border border-[#D1EBE5] dark:border-[#065f46]">
-                            {m}
+                 </div>
+
+                 {/* Category */}
+                 <div className="sm:col-span-4">
+                    <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Category & potency</span>
+                    <div className="flex flex-wrap gap-1.5">
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-gray-600">
+                            {product.category}
                         </span>
-                    ))}
-                </div>
+                        <span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium truncate max-w-full border border-gray-200 dark:border-gray-600">
+                            {product.potency}
+                        </span>
+                    </div>
+                 </div>
+
+                 {/* Markets */}
+                 <div className="sm:col-span-3 flex flex-col sm:items-end">
+                     <span className="text-[10px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-wider block mb-1">Markets</span>
+                     <div className="flex gap-1 sm:justify-end flex-wrap">
+                        {product.markets.map(m => (
+                            <span key={m} className="inline-flex items-center px-2 py-1 rounded bg-[#E8F5F1] dark:bg-[#064e3b] text-[#1B4D3E] dark:text-[#a7f3d0] text-[10px] font-bold border border-[#D1EBE5] dark:border-[#065f46]">
+                                {m}
+                            </span>
+                        ))}
+                     </div>
+                 </div>
             </div>
-         </div>
+        </div>
       </div>
     </div>
   );
