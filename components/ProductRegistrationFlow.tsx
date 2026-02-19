@@ -12,9 +12,10 @@ import { UseCase } from '../App';
 interface ProductRegistrationFlowProps {
   onClose: () => void;
   useCase: UseCase;
+  onSave?: () => void;
 }
 
-export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase }) => {
+export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase, onSave }) => {
   // Application State
   const [view, setView] = useState<ViewState>(ViewState.SEARCH);
   const [searchQuery, setSearchQuery] = useState('');
@@ -212,7 +213,7 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
   };
 
   const handleSaveProduct = () => {
-    alert("Product saved! (Prototype end)");
+    onSave?.();
     onClose();
   };
 

@@ -10,6 +10,7 @@ import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button } from './components/Button';
 import { Product, DashboardProduct } from './types';
 import { EditProductView } from './components/EditProductView';
+import { Toast } from './components/Toast';
 
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
@@ -19,6 +20,7 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
   
   // State for products to allow updates (like image saving)
   const [dashboardProducts, setDashboardProducts] = useState<DashboardProduct[]>(DASHBOARD_PRODUCTS);
@@ -30,6 +32,10 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  const showToast = (message: string) => {
+    setToast({ message, visible: true });
+  };
 
   const handleProductClick = (dashProduct: DashboardProduct) => {
     // Map DashboardProduct to Product
@@ -72,6 +78,7 @@ export default function App() {
         return p;
     }));
     setSelectedProduct(null);
+    showToast("Product saved successfully");
   };
 
   return (
@@ -267,7 +274,11 @@ export default function App() {
 
       {/* Registration Modal Overlay */}
       {isRegistrationModalOpen && (
-          <ProductRegistrationFlow useCase={useCase} onClose={() => setIsRegistrationModalOpen(false)} />
+          <ProductRegistrationFlow 
+            useCase={useCase} 
+            onClose={() => setIsRegistrationModalOpen(false)}
+            onSave={() => showToast("New product registered successfully")}
+          />
       )}
 
       {/* Detail View Overlay */}
@@ -280,6 +291,13 @@ export default function App() {
             />
         </div>
       )}
+
+      {/* Toast Notification */}
+      <Toast 
+        message={toast.message} 
+        isVisible={toast.visible} 
+        onClose={() => setToast(prev => ({ ...prev, visible: false }))} 
+      />
     </div>
   );
 }
