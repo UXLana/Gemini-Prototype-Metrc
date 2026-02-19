@@ -215,13 +215,13 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-50">
+      {/* Top Bar - Sticky Header (h-16 fixed height) */}
+      <div className="flex items-center justify-between px-6 h-16 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button onClick={onCancel} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-400 transition-colors">
             <X size={20} />
           </button>
-          <h2 className="text-sm font-medium text-gray-900 dark:text-white">{formData.name || 'New Product'}</h2>
+          <h2 className="text-sm font-medium text-gray-900 dark:text-white hidden sm:block">{formData.name || 'New Product'}</h2>
         </div>
         <Button onClick={handleSave} className="bg-[#2D7A65] hover:bg-[#236351] text-white px-5 py-2 text-xs font-bold shadow-sm">
           Save
@@ -250,9 +250,24 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
           <div className="grid grid-cols-1 lg:grid-cols-2 min-h-full">
             
             {/* LEFT: FORM SECTION (Order 1) */}
-            <div className={`p-10 lg:px-12 lg:pt-8 lg:pb-20 flex flex-col items-end ${activeTab === 'edit' ? 'block' : 'hidden'} lg:block bg-white dark:bg-gray-800 lg:order-1 transition-colors`}>
+            {/* 
+                Layout Update:
+                - pt-[40px] enforced
+                - xl:items-end (Aligns right towards center)
+                - xl:pr-[100px] (100px padding to create 200px gap)
+                - xl:pl-6 (Standard left padding)
+            */}
+            <div className={`
+                p-6 lg:px-12 
+                pt-[40px] lg:pt-[40px] lg:pb-12
+                xl:pr-[100px] xl:pl-6
+                flex flex-col items-center xl:items-end 
+                ${activeTab === 'edit' ? 'block' : 'hidden'} lg:block 
+                bg-white dark:bg-gray-800 
+                lg:order-1 transition-colors
+            `}>
               <div className="w-full max-w-[500px]">
-                <div className="mb-10">
+                <div className="mb-8 lg:mb-10">
                   <h1 className="text-2xl font-bold mb-2">Edit product</h1>
                   <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Here you can register your product and preview how it will appear to customers.</p>
                 </div>
@@ -517,138 +532,156 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             </div>
 
             {/* RIGHT: CUSTOMER PREVIEW SECTION (Order 2) */}
-            <div className={`bg-[#F9FAFB] dark:bg-gray-900 flex flex-col items-center justify-center lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block sticky top-0 h-full min-h-[600px] lg:order-2 transition-colors`}>
-              <div className="w-full max-w-[480px] p-10">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">Customer preview</h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">Product information people see when they scan the barcode</p>
-                </div>
+            <div className={`bg-[#F9FAFB] dark:bg-gray-900 flex flex-col lg:border-l border-gray-100 dark:border-gray-700 ${activeTab === 'preview' ? 'block' : 'hidden'} lg:block lg:order-2 transition-colors`}>
+              
+              {/* Sticky Container */}
+              {/* 
+                  Layout Update:
+                  - pt-[40px] enforced
+                  - xl:items-start (Aligns left towards center)
+                  - xl:pl-[100px] (100px padding to create 200px gap)
+                  - xl:pr-6 (Standard right padding)
+              */}
+              <div className="
+                  sticky top-16 
+                  flex flex-col items-center xl:items-start 
+                  pt-[40px] pb-10 
+                  px-6 lg:pb-12 lg:px-12 
+                  xl:pl-[100px] xl:pr-6 
+                  h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar
+              ">
+                  <div className="w-full max-w-[480px]">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-bold mb-1 text-gray-900 dark:text-white">Customer preview</h2>
+                      <p className="text-gray-500 dark:text-gray-400 text-xs">Product information people see when they scan the barcode</p>
+                    </div>
 
-                {/* iPhone-style Preview Card - SHADOW REMOVED */}
-                <div className="bg-white rounded-[24px] border border-gray-100 overflow-hidden flex flex-col h-full max-h-[780px]">
-                  <div className="p-8 pb-4">
-                    <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest mb-1">{formData.brand || 'BRAND'}</p>
-                    <h3 className="text-xl font-bold text-gray-900 leading-tight">{formData.name || 'Product Name'}</h3>
-                    <p className="text-[10px] text-gray-500 mt-1">Count: 10</p>
-                  </div>
+                    {/* iPhone-style Preview Card */}
+                    <div className="bg-white rounded-[24px] border border-gray-100 overflow-hidden flex flex-col shadow-sm">
+                      <div className="p-8 pb-4">
+                        <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest mb-1">{formData.brand || 'BRAND'}</p>
+                        <h3 className="text-xl font-bold text-gray-900 leading-tight">{formData.name || 'Product Name'}</h3>
+                        <p className="text-[10px] text-gray-500 mt-1">Count: 10</p>
+                      </div>
 
-                  <div 
-                    className="px-8 mb-6 relative flex flex-col items-center group"
-                  >
-                    <div 
-                        className="w-full aspect-[1/0.85] rounded-xl overflow-hidden mb-4 bg-gray-50/50 flex items-center justify-center border border-gray-50 relative isolate"
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                    >
-                      {uploadedFiles.length > 0 ? (
-                         uploadedFiles.map((file, idx) => (
-                             <img 
-                                key={file.thumb} // Using thumb URL as key to ensure uniqueness
-                                src={file.thumb} 
-                                alt="" 
-                                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${previewImage === file.thumb ? 'opacity-100 z-10' : 'opacity-0 z-0'}`} 
-                             />
-                         ))
-                      ) : (
-                         <div className="text-gray-300 flex flex-col items-center z-20">
-                            <ImageIcon size={48} className="mb-2 opacity-50" />
-                            <span className="text-xs font-medium">No Image</span>
-                         </div>
-                      )}
-                      
-                      {/* Left/Right Arrows for Slideshow - On Top Layer */}
-                      {uploadedFiles.length > 1 && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-between px-2 pointer-events-none">
-                            <button 
-                                onClick={handlePrevImage}
-                                className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
-                            >
-                                <ChevronLeft size={18} className="text-gray-800" />
-                            </button>
-                            <button 
-                                onClick={handleNextImage}
-                                className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
-                            >
-                                <ChevronRight size={18} className="text-gray-800" />
-                            </button>
+                      <div 
+                        className="px-8 mb-6 relative flex flex-col items-center group"
+                      >
+                        <div 
+                            className="w-full aspect-[1/0.85] rounded-xl overflow-hidden mb-4 bg-gray-50/50 flex items-center justify-center border border-gray-50 relative isolate"
+                            onTouchStart={onTouchStart}
+                            onTouchMove={onTouchMove}
+                            onTouchEnd={onTouchEnd}
+                        >
+                          {uploadedFiles.length > 0 ? (
+                             uploadedFiles.map((file, idx) => (
+                                 <img 
+                                    key={file.thumb} // Using thumb URL as key to ensure uniqueness
+                                    src={file.thumb} 
+                                    alt="" 
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${previewImage === file.thumb ? 'opacity-100 z-10' : 'opacity-0 z-0'}`} 
+                                 />
+                             ))
+                          ) : (
+                             <div className="text-gray-300 flex flex-col items-center z-20">
+                                <ImageIcon size={48} className="mb-2 opacity-50" />
+                                <span className="text-xs font-medium">No Image</span>
+                             </div>
+                          )}
+                          
+                          {/* Left/Right Arrows for Slideshow - On Top Layer */}
+                          {uploadedFiles.length > 1 && (
+                            <div className="absolute inset-0 z-20 flex items-center justify-between px-2 pointer-events-none">
+                                <button 
+                                    onClick={handlePrevImage}
+                                    className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
+                                >
+                                    <ChevronLeft size={18} className="text-gray-800" />
+                                </button>
+                                <button 
+                                    onClick={handleNextImage}
+                                    className="w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 pointer-events-auto cursor-pointer"
+                                >
+                                    <ChevronRight size={18} className="text-gray-800" />
+                                </button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    {/* Functional Slideshow Dots */}
-                    {uploadedFiles.length > 0 && (
-                      <div className="flex gap-1.5 z-10">
-                        {uploadedFiles.map((file, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setPreviewImage(file.thumb)}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                              previewImage === file.thumb 
-                                ? 'w-5 bg-gray-800' 
-                                : 'w-1.5 bg-gray-200 hover:bg-gray-300'
-                            }`}
-                            aria-label={`View image ${idx + 1}`}
-                          />
-                        ))}
+                        {/* Functional Slideshow Dots */}
+                        {uploadedFiles.length > 0 && (
+                          <div className="flex gap-1.5 z-10">
+                            {uploadedFiles.map((file, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => setPreviewImage(file.thumb)}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                  previewImage === file.thumb 
+                                    ? 'w-5 bg-gray-800' 
+                                    : 'w-1.5 bg-gray-200 hover:bg-gray-300'
+                                }`}
+                                aria-label={`View image ${idx + 1}`}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <div className="px-8 pb-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                    <div className="grid grid-cols-4 gap-2">
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Category</p>
-                        <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.category || '—'}</p>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Subspecies</p>
-                        <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.subspecies || '—'}</p>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Strain</p>
-                        <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.strain || '—'}</p>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
-                        <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Potency</p>
-                        <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.potency || '—'}</p>
-                      </div>
-                    </div>
+                      <div className="px-8 pb-8 space-y-6">
+                        <div className="grid grid-cols-4 gap-2">
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Category</p>
+                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.category || '—'}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Subspecies</p>
+                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.subspecies || '—'}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Strain</p>
+                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.strain || '—'}</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-3 border border-gray-50">
+                            <p className="text-[9px] text-gray-400 font-bold uppercase mb-1">Potency</p>
+                            <p className="text-[11px] font-bold text-gray-900 leading-tight">{formData.potency || '—'}</p>
+                          </div>
+                        </div>
 
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-500 mb-2">Feelings</p>
-                      <div className="flex flex-wrap gap-2">
-                        {formData.feelings.length > 0 ? formData.feelings.map((f, i) => (
-                          <span key={i} className={`px-2 py-1 text-[10px] font-bold rounded ${i === 0 ? 'bg-emerald-50 text-emerald-800' : 'bg-pink-50 text-pink-700'}`}>
-                            {f}
-                          </span>
-                        )) : <span className="text-[10px] text-gray-300 italic">No feelings specified</span>}
-                      </div>
-                    </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-gray-500 mb-2">Feelings</p>
+                          <div className="flex flex-wrap gap-2">
+                            {formData.feelings.length > 0 ? formData.feelings.map((f, i) => (
+                              <span key={i} className={`px-2 py-1 text-[10px] font-bold rounded ${i === 0 ? 'bg-emerald-50 text-emerald-800' : 'bg-pink-50 text-pink-700'}`}>
+                                {f}
+                              </span>
+                            )) : <span className="text-[10px] text-gray-300 italic">No feelings specified</span>}
+                          </div>
+                        </div>
 
-                    {/* Display Selected Markets in Preview if available */}
-                    {formData.markets && formData.markets.length > 0 && (
-                      <div>
-                        <p className="text-[10px] font-bold text-gray-500 mb-2">Active Markets</p>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {formData.markets.map(m => (
-                            <span key={m} className="inline-block px-2.5 py-1 bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] rounded text-[10px] font-bold border border-[#DCFCE7] dark:border-[#065f46]">{m}</span>
-                          ))}
+                        {/* Display Selected Markets in Preview if available */}
+                        {formData.markets && formData.markets.length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-500 mb-2">Active Markets</p>
+                            <div className="flex gap-1.5 flex-wrap">
+                              {formData.markets.map(m => (
+                                <span key={m} className="inline-block px-2.5 py-1 bg-[#DCFCE7] dark:bg-[#064e3b] text-[#166534] dark:text-[#a7f3d0] rounded text-[10px] font-bold border border-[#DCFCE7] dark:border-[#065f46]">{m}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div>
+                          <h4 className="text-sm font-bold text-gray-900 mb-3">Details</h4>
+                          <div className="space-y-4">
+                            {/* Increased Text Size to text-sm */}
+                            <p className="text-sm text-gray-500 leading-relaxed">
+                              {formData.description || "Enter a description to see it here."}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    )}
-
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-900 mb-3">Details</h4>
-                      <div className="space-y-4">
-                        {/* Increased Text Size to text-sm */}
-                        <p className="text-sm text-gray-500 leading-relaxed">
-                          {formData.description || "Enter a description to see it here."}
-                        </p>
-                      </div>
                     </div>
                   </div>
-                </div>
               </div>
             </div>
 
