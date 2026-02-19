@@ -187,14 +187,15 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
             
             {/* LEFT: FORM SECTION */}
             <div className={`
-                w-full p-6 lg:px-12 
+                w-full p-6 lg:pl-16 lg:pr-8 
                 pt-8 lg:pt-8 lg:pb-12
-                flex flex-col items-center lg:items-end 
+                xl:pl-24 xl:pr-8
+                flex flex-col items-end 
                 ${activeTab === 'edit' ? 'flex' : 'hidden'} lg:flex 
                 bg-white dark:bg-gray-800 
                 lg:order-1 transition-colors
             `}>
-              <div className="w-full max-w-[500px]">
+              <div className="w-full max-w-[500px] ml-auto">
                 <div className="mb-8 lg:mb-10">
                   <h1 className="text-2xl font-bold mb-2">Edit product</h1>
                   <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">Here you can register your product and preview how it will appear to customers.</p>
