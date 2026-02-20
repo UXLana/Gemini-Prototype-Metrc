@@ -138,7 +138,7 @@ export const DASHBOARD_PRODUCTS: DashboardProduct[] = [
     name: "Summer Vibes Starter Pack",
     licenseNumber: "BNDL-SUM-2024",
     brands: ["Wyld", "Kynd"],
-    subProducts: ["Wyld Peach Hybrid Gummies", "Kynd 1g Pre-Roll"],
+    subProducts: ["Elderberry Indica Gummies", "Kynd - Blackwater OG (3.5g)"],
     markets: ["NV"],
     totalMarkets: 1,
     imageUrl: IMAGES.WYLD_GUMMIES,

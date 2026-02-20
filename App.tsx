@@ -51,6 +51,7 @@ export default function App() {
   const [listColumns, setListColumns] = useState<ProductColumn[]>(DEFAULT_COLUMNS);
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
   const [bundleModalOpen, setBundleModalOpen] = useState(false);
+  const [bundleFromSelection, setBundleFromSelection] = useState(false);
   const [buildBundleOpen, setBuildBundleOpen] = useState(false);
   const [bundleName, setBundleName] = useState('');
   const [editingBundle, setEditingBundle] = useState<DashboardProduct | null>(null);
@@ -258,9 +259,12 @@ export default function App() {
                             <TabButton>Active</TabButton>
                             <TabButton>Archived</TabButton>
                         </div>
-                        <div className="pb-2">
+                        <div className="pb-2 flex gap-2">
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
-                                Register new product
+                                Register product
+                            </Button>
+                            <Button emphasis="low" leftIcon={<Package size={16} color="rgba(37, 208, 148, 1)" />} onClick={() => setBundleModalOpen(true)} style={{ color: 'rgba(30, 174, 124, 1)' }}>
+                                New bundle
                             </Button>
                         </div>
                     </div>
@@ -289,7 +293,7 @@ export default function App() {
                                     }} title="Edit">
                                         <Pencil size={16} />
                                     </IconButton>
-                                    <IconButton onClick={() => setBundleModalOpen(true)} title="Create bundle">
+                                    <IconButton onClick={() => { setBundleFromSelection(true); setBundleModalOpen(true); }} title="Create bundle">
                                         <Package size={16} />
                                     </IconButton>
                                     <IconButton onClick={() => {
@@ -378,7 +382,7 @@ export default function App() {
 
       <BundleNameModal
         open={bundleModalOpen}
-        onCancel={() => setBundleModalOpen(false)}
+        onCancel={() => { setBundleModalOpen(false); setBundleFromSelection(false); }}
         onContinue={(name) => {
           setBundleName(name);
           setEditingBundle(null);
@@ -397,10 +401,12 @@ export default function App() {
             initialProducts={
               editingBundle
                 ? dashboardProducts.filter(p => p.type === 'Product' && editingBundle.subProducts?.includes(p.name))
-                : dashboardProducts.filter(p => selectedProductIds.has(p.id))
+                : bundleFromSelection
+                  ? dashboardProducts.filter(p => selectedProductIds.has(p.id))
+                  : []
             }
             allProducts={dashboardProducts}
-            onCancel={() => { setBuildBundleOpen(false); setEditingBundle(null); }}
+            onCancel={() => { setBuildBundleOpen(false); setEditingBundle(null); setBundleFromSelection(false); }}
             onSave={(name, items, price) => {
               const newBundle: DashboardProduct = {
                 id: `bundle_${Date.now()}`,
@@ -418,6 +424,7 @@ export default function App() {
               clearSelection();
               setBuildBundleOpen(false);
               setEditingBundle(null);
+              setBundleFromSelection(false);
               showToast(`Bundle "${name}" created with ${items.length} products`);
             }}
           />

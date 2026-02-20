@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppColors } from '../hooks/useDarkMode';
+import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import {
   Home, Box, Layers, Settings, ArrowUpDown, X
 } from 'lucide-react';
@@ -123,6 +123,11 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
 
 function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean }) {
   const colors = useAppColors();
+  const { isDark } = useDarkMode();
+
+  const activeIconColor = isDark ? '#2EE5D9' : '#F5FFFB';
+  const activeTextColor = isDark ? '#25D094' : '#F5FFFB';
+
   return (
     <a
       href="#"
@@ -132,12 +137,12 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; la
         ${collapsed ? 'justify-center w-10 h-10 mx-auto gap-0' : 'px-2 py-2 w-full gap-3'}
       `}
       style={{
-        color: active ? colors.brand.default : colors.text.lowEmphasis.onLight,
+        color: active ? activeTextColor : colors.text.lowEmphasis.onLight,
         backgroundColor: active ? colors.hover.onLight : undefined
       }}
       title={collapsed ? label : undefined}
     >
-      <span className="shrink-0">{icon}</span>
+      <span className="shrink-0" style={active ? { color: activeIconColor } : undefined}>{icon}</span>
       <span className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
         {label}
       </span>

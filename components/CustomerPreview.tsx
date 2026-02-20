@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { useAppColors } from '../hooks/useDarkMode';
+import { useColors } from 'mtr-design-system/styles/themes';
 
 interface UploadedFile {
   name: string;
@@ -31,7 +32,8 @@ export const CustomerPreview: React.FC<CustomerPreviewProps> = ({
   activeImage,
   onImageChange,
 }) => {
-  const colors = useAppColors();
+  const appColors = useAppColors();
+  const colors = useColors();
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -77,8 +79,8 @@ export const CustomerPreview: React.FC<CustomerPreviewProps> = ({
   return (
     <div className="w-full max-w-[400px]">
       <div className="mb-4">
-        <h2 className="text-base font-semibold mb-0.5" style={{ color: colors.text.highEmphasis.onLight }}>Customer preview</h2>
-        <p className="text-xs" style={{ color: colors.text.lowEmphasis.onLight }}>Product information people see when they scan the barcode</p>
+        <h2 className="text-base font-semibold mb-0.5" style={{ color: appColors.text.highEmphasis.onLight }}>Customer preview</h2>
+        <p className="text-xs" style={{ color: appColors.text.lowEmphasis.onLight }}>Product information people see when they scan the barcode</p>
       </div>
 
       {/* iPhone-style Preview Card — intentionally light-only with fixed colors */}
