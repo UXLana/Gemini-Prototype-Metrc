@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .vercel
 .env*.local
+
+# Cursor prompt files
+CURSOR-PROMPT-*.md
