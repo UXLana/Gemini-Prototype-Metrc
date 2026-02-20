@@ -1,12 +1,14 @@
 import React from 'react';
+import { useColors } from 'mtr-design-system/styles/themes';
+import { Badge } from 'mtr-design-system/components';
 import { ArrowUp, Check, Minus, MoreVertical } from 'lucide-react';
 import { DashboardProduct } from '../types';
+import type { ThemeColors } from 'mtr-design-system/styles/themes/theme-interface';
 
 export interface ProductColumn {
   id: string;
   label: string;
   visible: boolean;
-  /** Fixed columns (checkbox, actions) can't be removed or reordered */
   locked?: boolean;
 }
 
@@ -31,12 +33,12 @@ interface ProductListViewProps {
 const CELL_RENDERERS: Record<string, {
   headerClass?: string;
   sortable?: boolean;
-  render: (product: DashboardProduct, onProductClick?: (p: DashboardProduct) => void, handleImageError?: (e: React.SyntheticEvent<HTMLImageElement>) => void) => React.ReactNode;
+  render: (product: DashboardProduct, colors: ThemeColors, onProductClick?: (p: DashboardProduct) => void, handleImageError?: (e: React.SyntheticEvent<HTMLImageElement>) => void) => React.ReactNode;
 }> = {
   image: {
     headerClass: 'w-16',
-    render: (product, _onClick, handleImageError) => (
-      <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+    render: (product, colors, _onClick, handleImageError) => (
+      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: colors.surface.lightDarker }}>
         <img
           src={product.imageUrl}
           alt={product.name}
@@ -48,10 +50,11 @@ const CELL_RENDERERS: Record<string, {
   },
   product: {
     sortable: true,
-    render: (product, onProductClick) => (
+    render: (product, colors, onProductClick) => (
       <button
         onClick={() => onProductClick?.(product)}
-        className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-medium text-left hover:underline transition-colors"
+        className="font-medium text-left hover:underline transition-colors"
+        style={{ color: colors.brand.default }}
       >
         {product.name}
       </button>
@@ -61,35 +64,29 @@ const CELL_RENDERERS: Record<string, {
     render: (product) => (
       <div className="flex flex-wrap gap-1.5">
         {product.brands.map((brand) => (
-          <span
-            key={brand}
-            className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800"
-          >
-            {brand}
-          </span>
+          <Badge key={brand} variant="outlined" color="info">{brand}</Badge>
         ))}
       </div>
     ),
   },
   category: {
-    render: (product) => (
-      <span className="text-gray-700 dark:text-gray-300">{product.category || '—'}</span>
+    render: (product, colors) => (
+      <span style={{ color: colors.text.highEmphasis.onLight }}>{product.category || '—'}</span>
     ),
   },
   license: {
-    render: (product) => (
-      <span className="text-gray-500 dark:text-gray-400 font-mono text-xs">{product.licenseNumber}</span>
+    render: (product, colors) => (
+      <span className="font-mono text-xs" style={{ color: colors.text.lowEmphasis.onLight }}>{product.licenseNumber}</span>
     ),
   },
   status: {
-    render: (product) => (
+    render: (product, colors) => (
       <span className="inline-flex items-center gap-1.5">
-        <span className={`w-2 h-2 rounded-full ${
-          product.status === 'Active' ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-500'
-        }`} />
-        <span className={`text-sm ${
-          product.status === 'Active' ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'
-        }`}>
+        <span
+          className="w-2 h-2 rounded-full"
+          style={{ backgroundColor: product.status === 'Active' ? colors.status.success : colors.text.disabled.onLight }}
+        />
+        <span className="text-sm" style={{ color: product.status === 'Active' ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight }}>
           {product.status || 'Active'}
         </span>
       </span>
@@ -100,6 +97,8 @@ const CELL_RENDERERS: Record<string, {
 export const ProductListView: React.FC<ProductListViewProps> = ({
   products, columns, selectedIds, onToggleSelect, onToggleSelectAll, onProductClick
 }) => {
+  const colors = useColors();
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800";
     e.currentTarget.onerror = null;
@@ -110,18 +109,22 @@ export const ProductListView: React.FC<ProductListViewProps> = ({
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   return (
-    <div className="card overflow-hidden">
+    <div className="card overflow-hidden" style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700">
+            <tr style={{ borderBottom: `1px solid ${colors.border.lowEmphasis.onLight}` }}>
               <th className="w-12 px-4 py-3 text-left">
                 <div
                   onClick={onToggleSelectAll}
-                  className={`check-indicator w-5 h-5 cursor-pointer ${allSelected || someSelected ? 'check-indicator-on' : 'check-indicator-off'}`}
+                  className="check-indicator w-5 h-5 cursor-pointer"
+                  style={{
+                    backgroundColor: (allSelected || someSelected) ? colors.brand.default : colors.surface.light,
+                    borderColor: (allSelected || someSelected) ? colors.brand.default : colors.border.midEmphasis.onLight
+                  }}
                 >
-                  {allSelected && <Check size={14} className="text-white" />}
-                  {someSelected && <Minus size={14} className="text-white" />}
+                  {allSelected && <Check size={14} style={{ color: colors.text.highEmphasis.onDark }} />}
+                  {someSelected && <Minus size={14} style={{ color: colors.text.highEmphasis.onDark }} />}
                 </div>
               </th>
               {visibleColumns.map((col) => {
@@ -129,12 +132,12 @@ export const ProductListView: React.FC<ProductListViewProps> = ({
                 return (
                   <th key={col.id} className={`px-3 py-3 text-left ${renderer?.headerClass || ''}`}>
                     {renderer?.sortable ? (
-                      <button className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                      <button className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider hover:opacity-70 transition-colors" style={{ color: colors.text.lowEmphasis.onLight }}>
                         <ArrowUp size={12} />
                         {col.label}
                       </button>
                     ) : (
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: colors.text.lowEmphasis.onLight }}>
                         {col.label}
                       </span>
                     )}
@@ -144,29 +147,43 @@ export const ProductListView: React.FC<ProductListViewProps> = ({
               <th className="w-12 px-3 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+          <tbody>
             {products.map((product) => {
               const isSelected = selectedIds.has(product.id);
               return (
-                <tr key={product.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors group ${isSelected ? 'bg-brand-50/50 dark:bg-brand-900/10' : ''}`}>
+                <tr
+                  key={product.id}
+                  className="hover-surface-subtle transition-colors group"
+                  style={{
+                    borderBottom: `1px solid ${colors.border.lowEmphasis.onLight}`,
+                    backgroundColor: isSelected ? `${colors.brand.default}0A` : undefined
+                  }}
+                >
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div
                       onClick={() => onToggleSelect(product.id)}
-                      className={`check-indicator w-5 h-5 cursor-pointer ${isSelected ? 'check-indicator-on' : 'check-indicator-off'}`}
+                      className="check-indicator w-5 h-5 cursor-pointer"
+                      style={{
+                        backgroundColor: isSelected ? colors.brand.default : colors.surface.light,
+                        borderColor: isSelected ? colors.brand.default : colors.border.midEmphasis.onLight
+                      }}
                     >
-                      {isSelected && <Check size={14} className="text-white" />}
+                      {isSelected && <Check size={14} style={{ color: colors.text.highEmphasis.onDark }} />}
                     </div>
                   </td>
                   {visibleColumns.map((col) => {
                     const renderer = CELL_RENDERERS[col.id];
                     return (
                       <td key={col.id} className="px-3 py-3">
-                        {renderer?.render(product, onProductClick, handleImageError)}
+                        {renderer?.render(product, colors, onProductClick, handleImageError)}
                       </td>
                     );
                   })}
                   <td className="px-3 py-3">
-                    <button className="p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      className="p-1 rounded-md hover-surface opacity-0 group-hover:opacity-100 transition-all"
+                      style={{ color: colors.text.disabled.onLight }}
+                    >
                       <MoreVertical size={16} />
                     </button>
                   </td>

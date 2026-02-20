@@ -1,4 +1,5 @@
 import React from 'react';
+import { useColors } from 'mtr-design-system/styles/themes';
 import {
   Home, Box, Layers, Settings, ArrowUpDown, X
 } from 'lucide-react';
@@ -21,10 +22,12 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
   onUseCaseChange,
   logo,
 }) => {
+  const colors = useColors();
+
   return (
     <aside
       className={`
-        bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col z-50
+        flex flex-col z-50
         fixed inset-y-0 left-0
         transition-all duration-300 ease-in-out
         h-[100dvh] md:h-full overflow-hidden
@@ -35,24 +38,32 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
         md:relative md:translate-x-0 md:shadow-none md:z-auto
         ${isOpen ? 'md:w-64' : 'md:w-[68px]'}
       `}
+      style={{
+        backgroundColor: colors.surface.light,
+        borderRight: `1px solid ${colors.border.lowEmphasis.onLight}`
+      }}
     >
       {/* Brand header */}
       <div className={`h-16 flex items-center shrink-0 ${isOpen ? 'px-4 justify-between md:justify-start gap-3' : 'justify-center'} mb-2`}>
         <div className="flex items-center gap-3">
           {logo ?? (
-            <div className="w-8 h-8 bg-brand-700 text-white rounded flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+            <div
+              className="w-8 h-8 rounded flex items-center justify-center font-bold text-lg shadow-sm shrink-0"
+              style={{ backgroundColor: colors.brand.default, color: colors.text.highEmphasis.onDark }}
+            >
               G
             </div>
           )}
           <div className={`overflow-hidden transition-all duration-300 flex flex-col justify-center ${isOpen ? 'w-auto opacity-100' : 'w-0 opacity-0 hidden md:hidden'}`}>
-            <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">GCR</h2>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">Global Cannabis Registry</p>
+            <h2 className="text-sm font-bold leading-none whitespace-nowrap" style={{ color: colors.text.highEmphasis.onLight }}>GCR</h2>
+            <p className="text-[10px] mt-0.5 whitespace-nowrap" style={{ color: colors.text.lowEmphasis.onLight }}>Global Cannabis Registry</p>
           </div>
         </div>
 
         <button
           onClick={onClose}
-          className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden"
+          className="p-2 hover-surface rounded-lg md:hidden"
+          style={{ color: colors.text.disabled.onLight }}
         >
           <X size={20} />
         </button>
@@ -65,28 +76,43 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
         <NavItem icon={<Layers size={20} />} label="Integrations" collapsed={!isOpen} />
       </nav>
 
-      {/* Footer — pinned to bottom */}
-      <div className={`p-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 transition-all space-y-3 shrink-0 ${!isOpen ? 'flex flex-col items-center justify-center' : ''}`}>
+      {/* Footer */}
+      <div
+        className={`p-4 transition-all space-y-3 shrink-0 ${!isOpen ? 'flex flex-col items-center justify-center' : ''}`}
+        style={{
+          borderTop: `1px solid ${colors.border.lowEmphasis.onLight}`,
+          backgroundColor: colors.surface.lightDarker
+        }}
+      >
         {isOpen ? (
           <div className="space-y-2">
-            <label className="form-label px-2">Prototype Mode</label>
+            <label className="form-label px-2" style={{ color: colors.text.lowEmphasis.onLight }}>Prototype Mode</label>
             <div className="relative">
               <select
                 value={useCase}
                 onChange={(e) => onUseCaseChange(e.target.value as UseCase)}
                 className="form-select py-2 pl-3 pr-8 text-xs font-medium shadow-sm"
+                style={{
+                  backgroundColor: colors.surface.light,
+                  borderColor: colors.border.midEmphasis.onLight,
+                  color: colors.text.highEmphasis.onLight
+                }}
               >
                 <option value="standard">Standard</option>
                 <option value="empty-search">Empty Search</option>
                 <option value="market-selection">Market Select</option>
               </select>
-              <div className="absolute right-2 top-2.5 pointer-events-none text-gray-400">
+              <div className="absolute right-2 top-2.5 pointer-events-none" style={{ color: colors.text.disabled.onLight }}>
                 <ArrowUpDown size={12} />
               </div>
             </div>
           </div>
         ) : (
-          <button className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg" title="Settings">
+          <button
+            className="p-2 hover-surface rounded-lg"
+            title="Settings"
+            style={{ color: colors.text.disabled.onLight }}
+          >
             <Settings size={20} />
           </button>
         )}
@@ -96,14 +122,19 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
 };
 
 function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean }) {
+  const colors = useColors();
   return (
     <a
       href="#"
       className={`
         flex items-center text-sm font-medium rounded-lg transition-all duration-200 group relative
-        ${active ? 'text-brand-700 dark:text-brand-400 bg-black/[0.06] dark:bg-white/[0.06]' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}
+        ${!active ? 'hover-surface-subtle' : ''}
         ${collapsed ? 'justify-center w-10 h-10 mx-auto gap-0' : 'px-2 py-2 w-full gap-3'}
       `}
+      style={{
+        color: active ? colors.brand.default : colors.text.lowEmphasis.onLight,
+        backgroundColor: active ? colors.hover.onLight : undefined
+      }}
       title={collapsed ? label : undefined}
     >
       <span className="shrink-0">{icon}</span>
@@ -111,7 +142,10 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; la
         {label}
       </span>
       {collapsed && (
-        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+        <div
+          className="absolute left-full ml-2 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50"
+          style={{ backgroundColor: colors.surface.darkDarker, color: colors.text.highEmphasis.onDark }}
+        >
           {label}
         </div>
       )}

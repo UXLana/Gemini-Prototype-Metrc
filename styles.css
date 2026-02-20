@@ -5,9 +5,11 @@
 /*
  * GCR Design System — Shared Utility Classes
  *
- * These @apply classes extract the most-repeated patterns across
- * components so a single change here propagates everywhere.
- * Use them as className values in JSX just like any Tailwind class.
+ * Color values are injected as CSS custom properties via ThemeBridge (index.tsx).
+ * These properties are set from the MTR Design System's useColors() hook.
+ *
+ * Interactive states (hover, focus, placeholder) reference CSS vars below.
+ * Static colors are applied inline via useColors() in each component.
  */
 
 @layer base {
@@ -19,52 +21,78 @@
     font-size: 0.875rem !important;
     line-height: 1.25rem !important;
   }
+
+  /* Placeholder color from theme */
+  ::placeholder {
+    color: var(--mtr-text-disabled-onLight) !important;
+    opacity: 1;
+  }
 }
 
 @layer components {
 
+  /* ───── Theme-aware interactive utilities ───── */
+
+  .hover-surface {
+    transition: background-color 150ms;
+  }
+  .hover-surface:hover {
+    background-color: var(--mtr-hover-onLight);
+  }
+
+  .hover-surface-subtle {
+    transition: background-color 150ms;
+  }
+  .hover-surface-subtle:hover {
+    background-color: var(--mtr-surface-lightDarker);
+  }
+
+  .focus-brand:focus {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--mtr-brand-default);
+    border-color: var(--mtr-brand-default);
+  }
+
   /* ───── Form elements ───── */
 
   .form-label {
-    @apply block text-xs font-medium text-black/60 dark:text-white/70
+    @apply block text-xs font-medium
            tracking-[0.2px] mb-1.5;
   }
 
   .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+    @apply w-full px-3 py-2 border
            rounded-md !text-sm !leading-5
-           focus:ring-1 focus:ring-brand-500 outline-none
-           bg-white dark:bg-gray-700
-           text-black/80 dark:text-white/80
-           placeholder-gray-400 dark:placeholder-gray-500
+           outline-none
            transition-colors;
+  }
+  .form-input:focus {
+    box-shadow: 0 0 0 1px var(--mtr-brand-default);
+    border-color: var(--mtr-brand-default);
   }
 
   .form-select {
-    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600
+    @apply w-full px-3 py-2 border
            rounded-md !text-sm !leading-5 appearance-none
-           focus:ring-1 focus:ring-brand-500 outline-none
-           bg-white dark:bg-gray-700
-           text-black/80 dark:text-white/80
-           placeholder-gray-400 dark:placeholder-gray-500
+           outline-none
            transition-colors;
+  }
+  .form-select:focus {
+    box-shadow: 0 0 0 1px var(--mtr-brand-default);
+    border-color: var(--mtr-brand-default);
   }
 
   /* ───── Card surfaces ───── */
 
   .card {
-    @apply bg-white dark:bg-gray-800
-           border border-gray-200 dark:border-gray-700
-           rounded-2xl shadow-sm transition-colors;
+    @apply border rounded-2xl shadow-sm transition-colors;
   }
 
   /* ───── Badges (mirrors MTR DLS Badge component) ───── */
-  /* Variants: filled, outlined, subtle                    */
-  /* Colors are set per-use via bg-*, text-*, border-*     */
 
   .badge-filled {
     @apply inline-flex items-center gap-1 px-2 py-0.5
-           rounded-lg border text-xs font-medium text-white
+           rounded-lg border text-xs font-medium
            whitespace-nowrap;
   }
 
@@ -80,35 +108,28 @@
            text-xs font-medium whitespace-nowrap;
   }
 
-  /* Neutral (default) shortcuts */
   .badge {
-    @apply badge-subtle bg-gray-100 dark:bg-gray-700
-           text-gray-700 dark:text-gray-300;
+    @apply badge-subtle;
   }
 
   .badge-outline {
-    @apply badge-outlined border-gray-300 dark:border-gray-600
-           text-gray-700 dark:text-gray-300;
+    @apply badge-outlined;
   }
 
-  /* Market badges — brand-colored */
   .badge-market {
-    @apply badge-subtle bg-brand-50 dark:bg-brand-900
-           text-brand-700 dark:text-brand-300
-           text-[10px] font-bold
-           border border-brand-200 dark:border-brand-850;
+    @apply badge-subtle
+           text-[10px] font-bold border;
   }
 
   .badge-market-sm {
-    @apply badge-subtle bg-brand-100 dark:bg-brand-900
-           text-brand-800 dark:text-brand-300
+    @apply badge-subtle
            text-[10px] font-bold;
   }
 
-  /* ───── Section labels (inside cards / detail views) ───── */
+  /* ───── Section labels ───── */
 
   .section-label {
-    @apply text-[10px] text-gray-400 dark:text-gray-500
+    @apply text-[10px]
            uppercase tracking-wider font-semibold mb-2;
   }
 
@@ -120,31 +141,31 @@
   }
 
   .check-indicator-on {
-    @apply bg-brand-500 border-brand-500;
+    background-color: var(--mtr-brand-default);
+    border-color: var(--mtr-brand-default);
   }
 
   .check-indicator-off {
-    @apply border-gray-300 dark:border-gray-500
-           bg-white dark:bg-gray-700;
+    background-color: var(--mtr-surface-light);
+    border-color: var(--mtr-border-midEmphasis-onLight);
   }
 
   /* ───── Dropdown menus ───── */
 
   .dropdown-menu {
     @apply absolute z-50 w-full mt-1
-           bg-white dark:bg-gray-700
-           border border-gray-200 dark:border-gray-600
-           rounded-md shadow-lg;
+           border rounded-md shadow-lg;
   }
 
   .dropdown-item {
     @apply flex items-center px-3 py-2 cursor-pointer text-sm
-           hover:bg-gray-50 dark:hover:bg-gray-600
            transition-colors;
+  }
+  .dropdown-item:hover {
+    background-color: var(--mtr-hover-onLight);
   }
 
   .dropdown-item-selected {
-    @apply bg-brand-50 dark:bg-brand-900/30
-           text-brand-700 dark:text-brand-300;
+    /* Colors applied inline via useColors() */
   }
 }

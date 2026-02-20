@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useColors } from 'mtr-design-system/styles/themes';
 import { Search, X, Sparkles, ArrowLeft, Plus, AlertCircle } from 'lucide-react';
 import { Product, ViewState } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
 import { ProductCard } from './ProductCard';
-import { Button } from './Button';
+import { Button } from 'mtr-design-system/components';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EditProductView } from './EditProductView';
 import { MarketSelectionView } from './MarketSelectionView';
@@ -17,6 +18,7 @@ interface ProductRegistrationFlowProps {
 }
 
 export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase, onSave }) => {
+  const colors = useColors();
   const [view, setView] = useState<ViewState>(ViewState.SEARCH);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -207,22 +209,20 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
     : selectedProduct;
 
   const isEditView = view === ViewState.EDIT;
-  
-  const scrimClassName = isEditView
-    ? "fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200" 
-    : "fixed inset-0 z-50 flex items-end md:items-center justify-center md:p-6 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200";
-
-  const containerClassName = isEditView
-    ? "w-full h-[100dvh] bg-white dark:bg-gray-800 shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
-    : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative";
 
   return (
     <div 
-        className={scrimClassName}
+        className={`fixed inset-0 z-50 flex ${isEditView ? 'items-center' : 'items-end md:items-center'} justify-center ${!isEditView ? 'md:p-6' : ''} backdrop-blur-sm animate-in fade-in duration-200`}
+        style={{ backgroundColor: colors.scrim }}
         onClick={attemptClose}
     >
       <div 
-        className={containerClassName}
+        className={
+          isEditView
+            ? "w-full h-[100dvh] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
+            : "w-full h-[100dvh] md:w-full md:max-w-4xl md:min-h-[500px] md:h-auto md:max-h-[85vh] md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out relative"
+        }
+        style={{ backgroundColor: colors.surface.light }}
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -236,7 +236,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
             <>
                 <button 
                     onClick={attemptClose}
-                    className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 z-50 transition-colors"
+                    className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full hover-surface z-50 transition-colors"
+                    style={{ color: colors.text.disabled.onLight }}
                 >
                     <X size={20} />
                 </button>
@@ -244,13 +245,13 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                 <div className="px-5 md:px-10 pt-6 md:pt-8 pb-2 z-20 shrink-0">
                   <div className="flex items-center gap-3 mb-1">
                     {(view === ViewState.CONFIRM || view === ViewState.MARKET_SELECTION) && (
-                        <button onClick={handleBack} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <button onClick={handleBack} className="hover:opacity-70 transition-colors" style={{ color: colors.text.disabled.onLight }}>
                             <ArrowLeft size={24} />
                         </button>
                     )}
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">Find or create new product</h1>
+                    <h1 className="text-xl font-bold" style={{ color: colors.text.highEmphasis.onLight }}>Find or create new product</h1>
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Look for the product in Metrc database of create a new one</p>
+                  <p className="text-sm" style={{ color: colors.text.lowEmphasis.onLight }}>Look for the product in Metrc database of create a new one</p>
                 </div>
 
                 <div className="flex-1 px-5 md:px-10 py-6 overflow-y-auto custom-scrollbar relative transition-colors flex flex-col min-h-0">
@@ -260,11 +261,16 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                       <div className="relative group shrink-0 mb-6 mt-2">
                         <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Search className="h-5 w-5 text-gray-400 group-focus-within:text-brand-500 transition-colors" />
+                          <Search className="h-5 w-5 transition-colors" style={{ color: colors.text.disabled.onLight }} />
                         </div>
                         <input
                           type="text"
-                          className="block w-full pl-11 pr-10 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:placeholder-gray-300 dark:focus:placeholder-gray-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all duration-200 text-sm shadow-sm text-gray-900 dark:text-white"
+                          className="block w-full pl-11 pr-10 py-3.5 border rounded-xl leading-5 outline-none focus-brand transition-all duration-200 text-sm shadow-sm"
+                          style={{
+                            backgroundColor: colors.surface.light,
+                            borderColor: colors.border.midEmphasis.onLight,
+                            color: colors.text.highEmphasis.onLight
+                          }}
                           placeholder="Start typing license number or product name..."
                           value={searchQuery}
                           onChange={handleSearch}
@@ -273,7 +279,8 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                         {searchQuery && (
                           <button 
                             onClick={handleClearSearch}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                            style={{ color: colors.text.disabled.onLight }}
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -282,11 +289,14 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
                       
                       {!searchQuery && products.length === 0 && (
                         <div className="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-300 mb-8">
-                           <div className="w-14 h-14 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-600">
-                              <Search size={22} className="text-gray-300 dark:text-gray-500" />
+                           <div
+                             className="w-14 h-14 rounded-full flex items-center justify-center mb-4 border"
+                             style={{ backgroundColor: colors.surface.lightDarker, borderColor: colors.border.lowEmphasis.onLight }}
+                           >
+                              <Search size={22} style={{ color: colors.text.disabled.onLight }} />
                            </div>
-                           <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Search for a product</h3>
-                           <p className="text-gray-500 dark:text-gray-400 text-center max-w-xs leading-relaxed text-sm">
+                           <h3 className="text-base font-semibold mb-1" style={{ color: colors.text.highEmphasis.onLight }}>Search for a product</h3>
+                           <p className="text-center max-w-xs leading-relaxed text-sm" style={{ color: colors.text.lowEmphasis.onLight }}>
                               Enter the product name or license number to search the Metrc database.
                            </p>
                         </div>
@@ -294,14 +304,17 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                       {isNoResults && (
                         <div className="flex-1 flex flex-col items-center justify-center text-center py-8 animate-in fade-in">
-                          <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-5">
-                              <Search className="text-gray-400 dark:text-gray-500" size={28} />
+                          <div
+                            className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
+                            style={{ backgroundColor: colors.surface.lightDarker }}
+                          >
+                              <Search size={28} style={{ color: colors.text.disabled.onLight }} />
                           </div>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No matches found</h3>
-                          <p className="text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">
-                              We couldn't find "<span className="font-semibold text-gray-900 dark:text-white">{searchQuery}</span>" in the Metrc database. 
+                          <h3 className="text-lg font-bold mb-2" style={{ color: colors.text.highEmphasis.onLight }}>No matches found</h3>
+                          <p className="max-w-sm leading-relaxed mb-6" style={{ color: colors.text.lowEmphasis.onLight }}>
+                              We couldn't find "<span className="font-semibold" style={{ color: colors.text.highEmphasis.onLight }}>{searchQuery}</span>" in the Metrc database. 
                           </p>
-                          <p className="text-sm text-gray-400 dark:text-gray-500">You can create a new product entry below.</p>
+                          <p className="text-sm" style={{ color: colors.text.disabled.onLight }}>You can create a new product entry below.</p>
                         </div>
                       )}
 
@@ -344,20 +357,26 @@ export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = (
 
                 </div>
 
-                <div className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shrink-0 shadow-none">
-                  <Button variant="secondary" onClick={handleCancel}>
+                <div
+                  className="px-5 md:px-10 py-4 md:py-6 mt-auto flex justify-between items-center z-30 transition-colors shrink-0 shadow-none"
+                  style={{
+                    backgroundColor: colors.surface.light,
+                    borderTop: `1px solid ${colors.border.lowEmphasis.onLight}`
+                  }}
+                >
+                  <Button emphasis="mid" onClick={handleCancel}>
                     Cancel
                   </Button>
                   
                   <Button 
-                    variant="primary" 
+                    emphasis="high" 
                     disabled={
                         (view === ViewState.SEARCH && !selectedProductId && !isNoResults) || 
                         (view === ViewState.MARKET_SELECTION && !canProceedFromMarketSelection) ||
                         isGenerating
                     }
                     onClick={handleNext}
-                    isLoading={isGenerating}
+                    loading={isGenerating}
                     className={`px-8 transition-all ${isNoResults ? 'min-w-[200px]' : 'min-w-[120px]'}`}
                   >
                     {isNoResults ? (
