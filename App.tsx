@@ -16,6 +16,8 @@ import { EditProductView } from './components/EditProductView';
 import { Toast } from './components/Toast';
 import { CanopyLogo } from './components/CanopyLogo';
 import { RegistryLeftNav } from './components/RegistryLeftNav';
+import { BundleNameModal } from './components/BundleNameModal';
+import { BuildBundleView, BundleItem } from './components/BuildBundleView';
 
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
@@ -32,6 +34,15 @@ export default function App() {
     return false;
   });
 
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => {
+      if (!e.matches) setSidebarOpen(false);
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
   
@@ -39,6 +50,10 @@ export default function App() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [listColumns, setListColumns] = useState<ProductColumn[]>(DEFAULT_COLUMNS);
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+  const [bundleModalOpen, setBundleModalOpen] = useState(false);
+  const [buildBundleOpen, setBuildBundleOpen] = useState(false);
+  const [bundleName, setBundleName] = useState('');
+  const [editingBundle, setEditingBundle] = useState<DashboardProduct | null>(null);
 
   const toggleSelectProduct = (id: string) => {
     setSelectedProductIds(prev => {
@@ -71,6 +86,12 @@ export default function App() {
   };
 
   const handleProductClick = (dashProduct: DashboardProduct) => {
+    if (dashProduct.type === 'Bundle') {
+      setBundleName(dashProduct.name);
+      setEditingBundle(dashProduct);
+      setBuildBundleOpen(true);
+      return;
+    }
     const product: Product = {
         id: dashProduct.id,
         name: dashProduct.name,
@@ -276,7 +297,7 @@ export default function App() {
                                     }} title="Edit">
                                         <Pencil size={16} />
                                     </IconButton>
-                                    <IconButton onClick={() => showToast(`Bundle created from ${selectedProductIds.size} products`)} title="Create bundle">
+                                    <IconButton onClick={() => setBundleModalOpen(true)} title="Create bundle">
                                         <Package size={16} />
                                     </IconButton>
                                     <IconButton onClick={() => {
@@ -301,7 +322,7 @@ export default function App() {
 
                 {/* Product Grid / List */}
                 {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1500px]:grid-cols-5 gap-6 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5 gap-6 mb-8">
                       {dashboardProducts.map(product => (
                           <DashboardProductCard 
                               key={product.id} 
@@ -360,6 +381,54 @@ export default function App() {
                 onSave={handleProductSave}
                 onCancel={() => setSelectedProduct(null)}
             />
+        </div>
+      )}
+
+      <BundleNameModal
+        open={bundleModalOpen}
+        onCancel={() => setBundleModalOpen(false)}
+        onContinue={(name) => {
+          setBundleName(name);
+          setEditingBundle(null);
+          setBundleModalOpen(false);
+          setBuildBundleOpen(true);
+        }}
+      />
+
+      {buildBundleOpen && (
+        <div
+          className="fixed inset-0 w-full h-full z-[60] overflow-hidden flex flex-col animate-in fade-in duration-300"
+          style={{ backgroundColor: colors.surface.light }}
+        >
+          <BuildBundleView
+            bundleName={bundleName}
+            initialProducts={
+              editingBundle
+                ? dashboardProducts.filter(p => p.type === 'Product' && editingBundle.subProducts?.includes(p.name))
+                : dashboardProducts.filter(p => selectedProductIds.has(p.id))
+            }
+            allProducts={dashboardProducts}
+            onCancel={() => { setBuildBundleOpen(false); setEditingBundle(null); }}
+            onSave={(name, items, price) => {
+              const newBundle: DashboardProduct = {
+                id: `bundle_${Date.now()}`,
+                type: 'Bundle',
+                name,
+                licenseNumber: `BNDL-${Date.now().toString(36).toUpperCase()}`,
+                brands: [...new Set(items.flatMap(i => i.product.brands))],
+                subProducts: items.map(i => i.product.name),
+                markets: [...new Set(items.flatMap(i => i.product.markets))],
+                totalMarkets: new Set(items.flatMap(i => i.product.markets)).size,
+                imageUrl: items[0]?.product.imageUrl || '',
+                status: 'Active',
+              };
+              setDashboardProducts(prev => [newBundle, ...prev]);
+              clearSelection();
+              setBuildBundleOpen(false);
+              setEditingBundle(null);
+              showToast(`Bundle "${name}" created with ${items.length} products`);
+            }}
+          />
         </div>
       )}
 

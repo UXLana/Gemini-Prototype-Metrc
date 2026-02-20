@@ -64,7 +64,7 @@ const CELL_RENDERERS: Record<string, {
     render: (product) => (
       <div className="flex flex-wrap gap-1.5">
         {product.brands.map((brand) => (
-          <Badge key={brand} variant="outlined" color="info">{brand}</Badge>
+          <Badge key={brand} variant="subtle" color="neutral" size="sm">{brand}</Badge>
         ))}
       </div>
     ),
@@ -80,16 +80,10 @@ const CELL_RENDERERS: Record<string, {
     ),
   },
   status: {
-    render: (product, colors) => (
-      <span className="inline-flex items-center gap-1.5">
-        <span
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: product.status === 'Active' ? colors.status.success : colors.text.disabled.onLight }}
-        />
-        <span className="text-sm" style={{ color: product.status === 'Active' ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight }}>
-          {product.status || 'Active'}
-        </span>
-      </span>
+    render: (product) => (
+      <Badge variant="subtle" color={product.status === 'Active' ? 'success' : 'neutral'} size="sm">
+        {product.status || 'Active'}
+      </Badge>
     ),
   },
 };
@@ -132,12 +126,12 @@ export const ProductListView: React.FC<ProductListViewProps> = ({
                 return (
                   <th key={col.id} className={`px-3 py-3 text-left ${renderer?.headerClass || ''}`}>
                     {renderer?.sortable ? (
-                      <button className="flex items-center gap-1 text-xs font-medium uppercase tracking-wider hover:opacity-70 transition-colors" style={{ color: colors.text.lowEmphasis.onLight }}>
+                      <button className="flex items-center gap-1 text-xs font-medium tracking-wider hover:opacity-70 transition-colors" style={{ color: colors.text.highEmphasis.onLight }}>
                         <ArrowUp size={12} />
                         {col.label}
                       </button>
                     ) : (
-                      <span className="text-xs font-medium uppercase tracking-wider" style={{ color: colors.text.lowEmphasis.onLight }}>
+                      <span className="text-xs font-medium tracking-wider" style={{ color: colors.text.highEmphasis.onLight }}>
                         {col.label}
                       </span>
                     )}
