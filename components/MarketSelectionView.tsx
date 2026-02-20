@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Product } from '../types';
 import { Check, MapPin } from 'lucide-react';
 import { ALL_MARKETS } from '../constants';
@@ -10,7 +10,7 @@ interface MarketSelectionViewProps {
 }
 
 export const MarketSelectionView: React.FC<MarketSelectionViewProps> = ({ product, onSelectMarkets }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [selectedMarkets, setSelectedMarkets] = useState<string[]>([]);
 
   const toggleMarket = (marketId: string) => {

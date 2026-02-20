@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Upload, Trash2, ChevronDown, ChevronUp, X, Check, Search } from 'lucide-react';
 import { Product } from '../types';
 import { Button } from 'mtr-design-system/components';
@@ -26,7 +26,7 @@ const FEELING_OPTIONS = [
 ];
 
 export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSave, onCancel }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const fileInputRef = useRef<HTMLInputElement>(null);
   

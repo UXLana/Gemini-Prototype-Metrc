@@ -4,6 +4,7 @@ import './styles.css';
 import App from './App';
 import { ThemeProvider } from 'mtr-design-system/styles/themes';
 import { ThemeBridge } from './ThemeBridge';
+import { DarkModeProvider } from './hooks/useDarkMode';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,9 +15,11 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <ThemeProvider>
-      <ThemeBridge>
-        <App />
-      </ThemeBridge>
+      <DarkModeProvider>
+        <ThemeBridge>
+          <App />
+        </ThemeBridge>
+      </DarkModeProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

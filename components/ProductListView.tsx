@@ -1,6 +1,6 @@
 import React from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
-import { Badge } from 'mtr-design-system/components';
+import { useAppColors } from '../hooks/useDarkMode';
+import { AppBadge as Badge } from './AppBadge';
 import { ArrowUp, Check, Minus, MoreVertical } from 'lucide-react';
 import { DashboardProduct } from '../types';
 import type { ThemeColors } from 'mtr-design-system/styles/themes/theme-interface';
@@ -91,7 +91,7 @@ const CELL_RENDERERS: Record<string, {
 export const ProductListView: React.FC<ProductListViewProps> = ({
   products, columns, selectedIds, onToggleSelect, onToggleSelectAll, onProductClick
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800";

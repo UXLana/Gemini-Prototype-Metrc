@@ -3,16 +3,16 @@
  *
  * This lets CSS pseudo-states (hover, focus, placeholder) reference theme colors
  * without hardcoded Tailwind color utilities. Static colors should still be applied
- * inline via useColors() for best type-safety.
+ * inline via useAppColors() for best type-safety.
  *
  * Usage: Wrap your app inside ThemeBridge (must be inside ThemeProvider).
  */
 import { useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from './hooks/useDarkMode';
 import type { ReactNode } from 'react';
 
 export function ThemeBridge({ children }: { children: ReactNode }) {
-  const colors = useColors();
+  const colors = useAppColors();
 
   useEffect(() => {
     const root = document.documentElement;

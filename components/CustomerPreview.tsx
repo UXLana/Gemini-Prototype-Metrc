@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 
 interface UploadedFile {
   name: string;
@@ -31,7 +31,7 @@ export const CustomerPreview: React.FC<CustomerPreviewProps> = ({
   activeImage,
   onImageChange,
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 

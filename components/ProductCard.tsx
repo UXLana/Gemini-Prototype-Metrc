@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Product } from '../types';
 
 interface ProductCardProps {
@@ -20,7 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onRemove,
   onDoubleClick
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const isList = variant === 'list';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {

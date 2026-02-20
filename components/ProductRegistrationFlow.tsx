@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Search, X, Sparkles, ArrowLeft, Plus, AlertCircle } from 'lucide-react';
 import { Product, ViewState } from '../types';
 import { MOCK_PRODUCTS } from '../constants';
@@ -18,7 +18,7 @@ interface ProductRegistrationFlowProps {
 }
 
 export const ProductRegistrationFlow: React.FC<ProductRegistrationFlowProps> = ({ onClose, useCase, onSave }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [view, setView] = useState<ViewState>(ViewState.SEARCH);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);

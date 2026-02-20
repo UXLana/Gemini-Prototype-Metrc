@@ -1,5 +1,5 @@
 import React from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import {
   Home, Box, Layers, Settings, ArrowUpDown, X
 } from 'lucide-react';
@@ -22,7 +22,7 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
   onUseCaseChange,
   logo,
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
 
   return (
     <aside
@@ -122,7 +122,7 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
 };
 
 function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean }) {
-  const colors = useColors();
+  const colors = useAppColors();
   return (
     <a
       href="#"

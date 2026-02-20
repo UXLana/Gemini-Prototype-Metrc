@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Package } from 'lucide-react';
 import { Button } from 'mtr-design-system/components';
 
@@ -10,7 +10,7 @@ interface BundleNameModalProps {
 }
 
 export const BundleNameModal: React.FC<BundleNameModalProps> = ({ open, onContinue, onCancel }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [name, setName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 

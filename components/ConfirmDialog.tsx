@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from 'mtr-design-system/components';
 
@@ -24,7 +24,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
 
   useEffect(() => {
     if (!open) return;

@@ -1,6 +1,8 @@
 import React from 'react';
+import { useAppColors } from '../hooks/useDarkMode';
 import { useColors } from 'mtr-design-system/styles/themes';
-import { Badge } from 'mtr-design-system/components';
+import { Badge as DSBadge } from 'mtr-design-system/components';
+import { AppBadge as Badge } from './AppBadge';
 import { Layers, Package, Check } from 'lucide-react';
 import { DashboardProduct } from '../types';
 
@@ -12,7 +14,8 @@ interface DashboardProductCardProps {
 }
 
 export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ product, selected = false, onSelect, onClick }) => {
-  const colors = useColors();
+  const colors = useAppColors();
+  const lightColors = useColors();
   const isBundle = product.type === 'Bundle';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -28,23 +31,23 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
     >
       
       {/* Image Header Area */}
-      <div className="relative h-56 w-full group-hover:opacity-95 transition-opacity flex-none" style={{ backgroundColor: colors.surface.lightDarker }}>
+      <div className="relative h-56 w-full group-hover:opacity-95 transition-opacity flex-none" style={{ backgroundColor: lightColors.surface.lightDarker }}>
         <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); onSelect?.(product.id); }}>
            <div className="check-indicator w-5 h-5 shadow-sm cursor-pointer"
-             style={selected ? { backgroundColor: colors.brand.default, borderColor: colors.brand.default } : { borderColor: colors.border.midEmphasis.onLight, backgroundColor: colors.surface.light }}
+             style={selected ? { backgroundColor: lightColors.brand.default, borderColor: lightColors.brand.default } : { borderColor: lightColors.border.midEmphasis.onLight, backgroundColor: lightColors.surface.light }}
            >
-             {selected && <Check size={14} style={{ color: colors.text.highEmphasis.onDark }} />}
+             {selected && <Check size={14} style={{ color: lightColors.text.highEmphasis.onDark }} />}
            </div>
         </div>
 
         <div className="absolute top-4 right-4 z-10">
-          <Badge
+          <DSBadge
             variant="filled"
             color={isBundle ? "neutral" : "brand"}
             icon={isBundle ? <Layers style={{ width: 12, height: 12 }} /> : <Package style={{ width: 12, height: 12 }} />}
           >
             {product.type}
-          </Badge>
+          </DSBadge>
         </div>
 
         <img 

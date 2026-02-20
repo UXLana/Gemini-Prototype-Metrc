@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
-import { Badge, Button } from 'mtr-design-system/components';
+import { useAppColors } from '../hooks/useDarkMode';
+import { Button } from 'mtr-design-system/components';
+import { AppBadge as Badge } from './AppBadge';
 import { X, Upload, PlusCircle, ChevronDown, Search, Trash2, Package } from 'lucide-react';
 import { DashboardProduct } from '../types';
 
@@ -24,7 +25,7 @@ export const BuildBundleView: React.FC<BuildBundleViewProps> = ({
   onSave,
   onCancel,
 }) => {
-  const colors = useColors();
+  const colors = useAppColors();
   const [items, setItems] = useState<BundleItem[]>(() =>
     initialProducts.map(p => ({ product: p, units: 5 }))
   );
@@ -258,7 +259,7 @@ function BundleProductCard({
   onImageError,
 }: {
   item: BundleItem;
-  colors: ReturnType<typeof import('mtr-design-system/styles/themes').useColors>;
+  colors: ReturnType<typeof import('../hooks/useDarkMode').useAppColors>;
   onUnitsChange: (units: number) => void;
   onRemove: () => void;
   onImageError: (e: React.SyntheticEvent<HTMLImageElement>) => void;

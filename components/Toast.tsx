@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors } from '../hooks/useDarkMode';
 import { Check, X } from 'lucide-react';
 
 interface ToastProps {
@@ -9,7 +9,7 @@ interface ToastProps {
 }
 
 export const Toast: React.FC<ToastProps> = ({ message, isVisible, onClose }) => {
-  const colors = useColors();
+  const colors = useAppColors();
 
   useEffect(() => {
     if (isVisible) {

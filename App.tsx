@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useColors } from 'mtr-design-system/styles/themes';
+import { useAppColors, useDarkMode } from './hooks/useDarkMode';
 import { 
   Search, Bell, Box, Plus, 
   Filter, ArrowUpDown, LayoutGrid, List, ChevronLeft, ChevronRight,
@@ -22,7 +22,7 @@ import { BuildBundleView, BundleItem } from './components/BuildBundleView';
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
 export default function App() {
-  const colors = useColors();
+  const colors = useAppColors();
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [useCase, setUseCase] = useState<UseCase>('standard');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -43,7 +43,7 @@ export default function App() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
   
   const [dashboardProducts, setDashboardProducts] = useState<DashboardProduct[]>(DASHBOARD_PRODUCTS);
@@ -72,14 +72,6 @@ export default function App() {
   };
 
   const clearSelection = () => setSelectedProductIds(new Set());
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
 
   const showToast = (message: string) => {
     setToast({ message, visible: true });
@@ -200,7 +192,7 @@ export default function App() {
         <div className="flex items-center justify-end gap-2 shrink-0 min-w-[100px] md:min-w-[200px]" style={{ color: colors.text.lowEmphasis.onLight }}>
             <button className="p-2 hover-surface rounded-full transition-colors"><Bell size={20} /></button>
             <button 
-                onClick={() => setIsDarkMode(!isDarkMode)} 
+                onClick={toggleDarkMode} 
                 className="p-2 hover-surface rounded-full transition-colors"
                 title="Toggle Theme"
             >
@@ -442,7 +434,7 @@ export default function App() {
 }
 
 function StatCard({ label, value, icon }: { label: string, value: string, icon: React.ReactNode }) {
-    const colors = useColors();
+    const colors = useAppColors();
     return (
         <div
           className="card p-4 flex items-start gap-4 h-fit"
@@ -458,7 +450,7 @@ function StatCard({ label, value, icon }: { label: string, value: string, icon: 
 }
 
 function TabButton({ children, active }: { children?: React.ReactNode, active?: boolean }) {
-    const colors = useColors();
+    const colors = useAppColors();
     return (
         <button
           className="pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
@@ -473,7 +465,7 @@ function TabButton({ children, active }: { children?: React.ReactNode, active?: 
 }
 
 function IconButton({ children, active, onClick, title }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string }) {
-    const colors = useColors();
+    const colors = useAppColors();
     return (
         <button
           onClick={onClick}
