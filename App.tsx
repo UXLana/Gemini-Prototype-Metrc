@@ -4,14 +4,14 @@ import {
   Search, Bell, Box, Plus, 
   Filter, ArrowUpDown, LayoutGrid, List, ChevronLeft, ChevronRight,
   FileText, Menu, Grip, ChevronDown, Moon, Sun,
-  Trash2, Pencil, Package
+  Trash2, Pencil, Package, Bot
 } from 'lucide-react';
 import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductListView, DEFAULT_COLUMNS, ProductColumn } from './components/ProductListView';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button, Avatar, TabBar } from 'mtr-design-system/components';
-import { Product, DashboardProduct, UseCase, AppView } from './types';
+import { Product, DashboardProduct, UseCase, AppView, DotAnimation } from './types';
 import { EditProductView } from './components/EditProductView';
 import { Toast } from './components/Toast';
 import { CanopyLogo } from './components/CanopyLogo';
@@ -24,6 +24,8 @@ import { AppSwitcher } from './components/AppSwitcher';
 import { RegistryHomePage } from './components/RegistryHomePage';
 import { IntegrationsPage } from './components/IntegrationsPage';
 import { StatsRow } from './components/StatsRow';
+import { ChatPanel, CHAT_COLORS } from './components/ChatPanel';
+
 
 // export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 // export type AppView = 'home' | 'products' | 'integrations';
@@ -49,6 +51,10 @@ export default function App() {
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const gripRef = useRef<HTMLButtonElement>(null);
 
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatExpanded, setChatExpanded] = useState(false);
+  const [dotAnimation, setDotAnimation] = useState<DotAnimation>('pulse');
+
   useEffect(() => {
     const mqMd = window.matchMedia('(min-width: 768px)');
     const mqXl = window.matchMedia('(min-width: 1280px)');
@@ -68,6 +74,12 @@ export default function App() {
       mqXl.removeEventListener('change', handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (chatOpen) {
+      setSidebarOpen(false);
+    }
+  }, [chatOpen]);
 
   const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
@@ -240,23 +252,23 @@ export default function App() {
             </button>
         </div>
 
-        {/* Center Section: Search Bar */}
+        {/* Center Section: Search Bar (triggers chat panel) */}
         <div className="flex-1 flex justify-center px-4 lg:px-8">
-            <div className="w-full max-w-xl relative hidden md:block">
-                <input 
-                type="text" 
-                placeholder="Find or ask about a product or integration" 
-                className="w-full pl-4 pr-10 py-2 rounded-full border focus-brand outline-none text-sm transition-all"
+            {!chatOpen && (
+              <button
+                onClick={() => { setChatOpen(true); setChatExpanded(false); }}
+                className="w-full max-w-xl relative hidden md:flex items-center rounded-full border text-sm transition-all cursor-pointer text-left"
                 style={{
                   backgroundColor: colors.surface.lightDarker,
                   borderColor: colors.border.lowEmphasis.onLight,
-                  color: colors.text.highEmphasis.onLight
+                  color: colors.text.disabled.onLight,
+                  padding: '8px 16px',
                 }}
-                />
-                <div className="absolute right-3 top-2.5" style={{ color: colors.text.disabled.onLight }}>
-                    <Search size={16} />
-                </div>
-            </div>
+              >
+                <span className="flex-1">Find or ask about a product or integration</span>
+                <Search size={16} />
+              </button>
+            )}
         </div>
 
         {/* Right Section */}
@@ -295,8 +307,10 @@ export default function App() {
           onToggle={() => setSidebarOpen(!isSidebarOpen)}
           useCase={useCase}
           onUseCaseChange={setUseCase}
+          dotAnimation={dotAnimation}
+          onDotAnimationChange={setDotAnimation}
           currentView={currentView}
-          onViewChange={setCurrentView}
+          onViewChange={(view) => { setChatExpanded(false); setCurrentView(view); }}
           logo={
             <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 transition-transform hover:scale-105">
               <img src="/logo.png" alt="GCR" className="w-full h-full object-contain" />
@@ -306,11 +320,11 @@ export default function App() {
 
         {/* Main Content */}
         <main
-          className="flex-1 flex flex-col overflow-y-auto relative transition-colors"
+          className={`flex-1 flex flex-col overflow-y-auto relative transition-colors min-w-0 ${chatOpen && chatExpanded ? 'hidden' : ''}`}
           style={{ backgroundColor: colors.surface.lightDarker }}
         >
           {currentView === 'home' ? (
-            <RegistryHomePage onNavigateToProducts={() => setCurrentView('products')} />
+            <RegistryHomePage onNavigateToProducts={() => setCurrentView('products')} onProductClick={handleProductClick} chatOpen={chatOpen} />
           ) : currentView === 'integrations' ? (
             <IntegrationsPage />
           ) : (
@@ -335,6 +349,7 @@ export default function App() {
                             ]}
                             activeTab={activeTab}
                             onTabChange={setActiveTab}
+                            iconPosition="leading"
                             align="left"
                             hasDivider={false}
                             onDark={isDarkMode}
@@ -343,14 +358,6 @@ export default function App() {
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
                                 Register product
                             </Button>
-                            <Button 
-                                emphasis={selectedProductIds.size > 0 ? "mid" : "low"} 
-                                leftIcon={<Package size={16} />} 
-                                onClick={() => { if (selectedProductIds.size > 0) setBundleFromSelection(true); setBundleModalOpen(true); }} 
-                                style={isDarkMode && selectedProductIds.size === 0 ? { color: 'rgba(27, 172, 121, 1)' } : undefined}
-                            >
-                                {selectedProductIds.size > 0 ? 'New bundle from selected' : 'New bundle'}
-                            </Button>
                         </div>
                     </div>
                     
@@ -358,9 +365,9 @@ export default function App() {
                       className="flex flex-wrap items-center justify-between card p-2 gap-2"
                       style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}
                     >
-                        <div className="flex items-center gap-2 pl-2">
+                        <div className="flex items-center gap-1 pl-2">
                             <span
-                              className="text-sm"
+                              className="text-sm mr-1"
                               style={{
                                 color: selectedProductIds.size > 0 ? colors.brand.default : colors.text.lowEmphasis.onLight,
                                 fontWeight: selectedProductIds.size > 0 ? 500 : 400
@@ -375,27 +382,28 @@ export default function App() {
                                         const first = Array.from(selectedProductIds)[0];
                                         const p = dashboardProducts.find(dp => dp.id === first);
                                         if (p) handleProductClick(p);
-                                    }} title="Edit">
+                                    }} title="Edit" label="Edit">
                                         <Pencil size={16} />
                                     </IconButton>
-                                    <IconButton onClick={() => { setBundleFromSelection(true); setBundleModalOpen(true); }} title="Create bundle">
+                                    <IconButton onClick={() => { setBundleFromSelection(true); setBundleModalOpen(true); }} title="Create bundle" label="Bundle">
                                         <Package size={16} />
                                     </IconButton>
                                     <IconButton onClick={() => {
                                         setDashboardProducts(prev => prev.filter(p => !selectedProductIds.has(p.id)));
                                         clearSelection();
                                         showToast(`${selectedProductIds.size} product(s) deleted`);
-                                    }} title="Delete">
+                                    }} title="Delete" label="Delete">
                                         <Trash2 size={16} />
                                     </IconButton>
                                 </>
                             )}
                         </div>
-                        <div className="flex items-center gap-2 ml-auto">
+                        <div className="flex items-center gap-1 ml-auto">
                             <IconButton 
                                 onClick={() => setIsFilterOpen(true)} 
                                 active={isFilterOpen || Object.keys(activeFilters).length > 0}
                                 title="Filter"
+                                label="Filter"
                             >
                                 <span className="relative">
                                     <Filter size={16} />
@@ -407,10 +415,10 @@ export default function App() {
                                     )}
                                 </span>
                             </IconButton>
-                            <IconButton><ArrowUpDown size={16} /></IconButton>
+                            <IconButton label="Sort"><ArrowUpDown size={16} /></IconButton>
                             <div className="h-6 w-px mx-1" style={{ backgroundColor: colors.border.lowEmphasis.onLight }}></div>
-                            <IconButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')}><LayoutGrid size={16} /></IconButton>
-                            <IconButton active={viewMode === 'list'} onClick={() => setViewMode('list')}><List size={16} /></IconButton>
+                            <IconButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')} label="Grid"><LayoutGrid size={16} /></IconButton>
+                            <IconButton active={viewMode === 'list'} onClick={() => setViewMode('list')} label="List"><List size={16} /></IconButton>
                         </div>
                     </div>
                 </div>
@@ -435,8 +443,9 @@ export default function App() {
                 />
 
                 {/* Product Grid / List */}
+                <div key={activeTab} className="tab-content-animate">
                 {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5 gap-6 mb-8">
+                  <div className={`grid gap-6 mb-8 grid-cols-1 sm:grid-cols-2 ${chatOpen ? 'lg:grid-cols-2 xl:grid-cols-3 min-[1700px]:grid-cols-4' : 'lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5'}`}>
                       {pagedProducts.map(product => (
                           <DashboardProductCard 
                               key={product.id} 
@@ -459,6 +468,7 @@ export default function App() {
                     />
                   </div>
                 )}
+                </div>
 
                 {/* Pagination */}
                 <div className="flex flex-wrap items-center justify-end gap-6 text-sm" style={{ color: colors.text.lowEmphasis.onLight }}>
@@ -492,7 +502,29 @@ export default function App() {
                 </div>
             </div>
           )}
+
+          {/* FAB: Chat trigger */}
+          {!chatOpen && (
+            <button
+              onClick={() => { setChatOpen(true); setChatExpanded(false); }}
+              className="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full flex items-center justify-center focus:outline-none transition-transform hover:scale-110 active:scale-95 shadow-lg"
+              style={{ backgroundColor: CHAT_COLORS.primary }}
+              aria-label="Open chat"
+            >
+              <Bot size={24} color="#fff" />
+            </button>
+          )}
         </main>
+
+        {/* Chat Panel */}
+        <ChatPanel
+          isOpen={chatOpen}
+          isExpanded={chatExpanded}
+          onClose={() => { setChatOpen(false); setChatExpanded(false); }}
+          onToggleExpand={() => { if (!chatExpanded) setSidebarOpen(false); setChatExpanded(!chatExpanded); }}
+          dotAnimation={dotAnimation}
+          onDotAnimationChange={setDotAnimation}
+        />
       </div>
 
       {isRegistrationModalOpen && (
@@ -591,19 +623,20 @@ const PRODUCT_STATS = [
   { label: 'Active', value: '65', icon: <Box size={20} /> },
 ];
 
-function IconButton({ children, active, onClick, title }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string }) {
+function IconButton({ children, active, onClick, title, label }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string, label?: string }) {
     const colors = useAppColors();
     return (
         <button
           onClick={onClick}
           title={title}
-          className="p-2 rounded-lg hover-surface-subtle"
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover-surface-subtle text-xs font-medium"
           style={{
             color: active ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight,
             backgroundColor: active ? colors.hover.onLight : undefined
           }}
         >
             {children}
+            {label && <span className="hidden sm:inline">{label}</span>}
         </button>
     )
 }

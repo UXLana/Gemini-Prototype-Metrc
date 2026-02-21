@@ -8,13 +8,13 @@ const IMAGES = {
   // Premium flower jar that looks like Kynd (Glass jar with buds)
   KYND_FLOWER: "https://images.unsplash.com/photo-1556928045-16f7f50be0f3?auto=format&fit=crop&q=80&w=800",
   // Vape pen
-  VAPE_PEN: "https://images.unsplash.com/photo-1527661591478-9588939c4a87?auto=format&fit=crop&q=80&w=800",
+  VAPE_PEN: "https://images.unsplash.com/photo-1567922045116-2a00fae2ed03?auto=format&fit=crop&q=80&w=800",
   // Pre-roll
   PRE_ROLLS: "https://images.unsplash.com/photo-1528460033278-a6ba57020470?auto=format&fit=crop&q=80&w=800",
   // Concentrate
   CONCENTRATE: "https://images.unsplash.com/photo-1617347454431-f49d7ff5c3b1?auto=format&fit=crop&q=80&w=800",
   // Chocolate
-  CHOCOLATE: "https://images.unsplash.com/photo-1511381971708-4122d2122615?auto=format&fit=crop&q=80&w=800",
+  CHOCOLATE: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&q=80&w=800",
   // Fallback
   FALLBACK: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800"
 };

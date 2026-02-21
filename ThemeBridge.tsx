@@ -9,10 +9,26 @@
  */
 import { useEffect } from 'react';
 import { useAppColors } from './hooks/useDarkMode';
+import { button } from 'mtr-design-system/styles/design-tokens';
 import type { ReactNode } from 'react';
 
 export function ThemeBridge({ children }: { children: ReactNode }) {
   const colors = useAppColors();
+
+  // Patch DLS Button tokens synchronously so they apply before children render
+  button.emphasis.high.enabled.background = colors.brand.default;
+  button.emphasis.high.hover.background = colors.brand.lighter;
+  button.emphasis.high.pressed.background = colors.brand.darker;
+
+  button.emphasis.mid.enabled.text = colors.brand.default;
+  button.emphasis.mid.hover.text = colors.brand.default;
+  button.emphasis.mid.pressed.text = colors.brand.default;
+  button.emphasis.low.enabled.text = colors.brand.default;
+  button.emphasis.low.hover.text = colors.brand.default;
+  button.emphasis.low.pressed.text = colors.brand.default;
+
+  button.emphasisOnDark.high.enabled.text = colors.brand.default;
+  button.emphasisOnDark.high.hover.text = colors.brand.default;
 
   useEffect(() => {
     const root = document.documentElement;
