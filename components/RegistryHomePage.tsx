@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import { TabBar } from 'mtr-design-system/components';
 import { Package, Box, FileText, Layers, Plus, Pencil, RefreshCw, Archive, X, ArrowRight } from 'lucide-react';
@@ -62,8 +62,8 @@ interface Activity {
 const ACTIVITIES: Activity[] = [
   {
     icon: <Plus size={16} />,
-    title: 'Wyld Variety Pack',
-    desc: 'Created new product',
+    title: 'Summer Vibes Starter Pack',
+    desc: 'Created new bundle',
     time: 'Just now',
     productId: 'dash_4',
     changes: [
@@ -75,7 +75,7 @@ const ACTIVITIES: Activity[] = [
   },
   {
     icon: <Pencil size={16} />,
-    title: 'Wyld Raspberry',
+    title: 'Elderberry Indica Gummies',
     desc: 'Updated metadata',
     time: '5 min',
     productId: 'dash_1',
@@ -86,7 +86,7 @@ const ACTIVITIES: Activity[] = [
   },
   {
     icon: <RefreshCw size={16} />,
-    title: 'Raspberry e-pack',
+    title: 'Stiiizy - Blue Dream Pod',
     desc: 'Synced inventory',
     time: '30 min',
     productId: 'dash_7',
@@ -97,23 +97,13 @@ const ACTIVITIES: Activity[] = [
   },
   {
     icon: <Pencil size={16} />,
-    title: 'Elderberry gummies',
+    title: 'Elderberry Indica Gummies',
     desc: 'Updated price',
     time: '2 hrs',
     productId: 'dash_1',
     changes: [
       { field: 'Retail price', from: '$24.99', to: '$22.99' },
       { field: 'Wholesale price', from: '$14.50', to: '$13.00' },
-    ],
-  },
-  {
-    icon: <Pencil size={16} />,
-    title: 'Elderberry gummies',
-    desc: 'Updated price',
-    time: '5 hrs',
-    productId: 'dash_1',
-    changes: [
-      { field: 'Retail price', from: '$29.99', to: '$24.99' },
     ],
   },
   {
@@ -124,7 +114,6 @@ const ACTIVITIES: Activity[] = [
     productId: null,
     changes: [
       { field: 'Status', from: 'Active', to: 'Archived' },
-      { field: 'Markets removed', to: 'CA, NV' },
     ],
   },
 ];
@@ -139,7 +128,19 @@ export function RegistryHomePage({ onNavigateToProducts, onProductClick, chatOpe
   const colors = useAppColors();
   const { isDark } = useDarkMode();
   const [segmentTab, setSegmentTab] = React.useState('brand');
-  const [expandedActivity, setExpandedActivity] = useState<number | null>(null);
+  const [activePopover, setActivePopover] = useState<number | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activePopover === null) return;
+    const handle = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setActivePopover(null);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [activePopover]);
 
   const recentProducts = DASHBOARD_PRODUCTS.slice(0, 4);
   const segments = SEGMENTS_BY_TAB[segmentTab] || SEGMENTS_BY_TAB.category;
@@ -178,7 +179,8 @@ export function RegistryHomePage({ onNavigateToProducts, onProductClick, chatOpe
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium" style={{ color: colors.text.highEmphasis.onLight }}>Products by segment</h2>
             <button
-              className="text-xs font-medium text-link"
+              className="text-xs font-medium hover:underline"
+              style={{ color: colors.brand.default }}
               onClick={onNavigateToProducts}
             >Show all</button>
           </div>
@@ -227,110 +229,141 @@ export function RegistryHomePage({ onNavigateToProducts, onProductClick, chatOpe
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-medium" style={{ color: colors.text.highEmphasis.onLight }}>Recent activity</h2>
             <button
-              className="text-xs font-medium text-link"
+              className="text-xs font-medium hover:underline"
+              style={{ color: colors.brand.default }}
               onClick={onNavigateToProducts}
             >Show all</button>
           </div>
-          <div className="space-y-0">
+          <div className="relative">
             {ACTIVITIES.map((a, i) => {
-              const isExpanded = expandedActivity === i;
               const linkedProduct = a.productId ? DASHBOARD_PRODUCTS.find(p => p.id === a.productId) : null;
+              const isLast = i === ACTIVITIES.length - 1;
+              const isFirst = i === 0;
+              const isPopoverOpen = activePopover === i;
 
               return (
-                <div key={i}>
-                  <button
-                    className="flex items-start gap-3 relative w-full text-left rounded-lg px-2 py-3 -mx-2 transition-colors cursor-pointer"
-                    style={{ backgroundColor: isExpanded ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
-                    onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'; }}
-                    onMouseLeave={e => { if (!isExpanded) e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    onClick={() => setExpandedActivity(isExpanded ? null : i)}
-                  >
-                    {i !== ACTIVITIES.length - 1 && (
-                      <div
-                        className="absolute left-[23px] top-[44px] bottom-[-4px] w-[2px] z-0"
-                        style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
-                      />
-                    )}
+                <div key={i} className="relative flex gap-3" style={{ paddingLeft: 0 }}>
+                  {!isLast && (
+                    <div
+                      className="absolute w-[1px] z-0"
+                      style={{
+                        left: 15,
+                        top: isFirst ? 42 : 0,
+                        bottom: 0,
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                      }}
+                    />
+                  )}
 
+                  <div className="w-8 shrink-0 flex justify-center pt-2.5">
                     <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 relative z-10"
+                      className="w-8 h-8 rounded-full flex items-center justify-center relative z-10"
                       style={{
                         color: colors.brand.default,
                         border: `1.5px solid ${isDark ? colors.brand.default : 'rgba(0,0,0,0.07)'}`,
                         backgroundColor: colors.surface.light,
                       }}
                     >{a.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: colors.text.highEmphasis.onLight }}>{a.title}</p>
-                      <p className="text-xs" style={{ color: colors.text.lowEmphasis.onLight }}>{a.desc}</p>
-                    </div>
-                    <span className="text-xs shrink-0 pt-0.5" style={{ color: colors.text.lowEmphasis.onLight }}>{a.time}</span>
-                  </button>
+                  </div>
 
-                  {isExpanded && (
-                    <div
-                      className="ml-[42px] mb-3 rounded-lg border p-3 relative"
-                      style={{
-                        backgroundColor: colors.surface.lightDarker,
-                        borderColor: colors.border.lowEmphasis.onLight,
-                      }}
+                  <div className="flex-1 min-w-0 relative">
+                    <button
+                      className="w-full flex items-start gap-2 text-left rounded-lg px-3 py-2.5 transition-colors cursor-pointer"
+                      style={{ backgroundColor: isPopoverOpen ? (isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)') : 'transparent' }}
+                      onMouseEnter={e => { if (!isPopoverOpen) e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'; }}
+                      onMouseLeave={e => { if (!isPopoverOpen) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      onClick={() => setActivePopover(isPopoverOpen ? null : i)}
                     >
-                      <button
-                        onClick={() => setExpandedActivity(null)}
-                        className="absolute top-2 right-2 p-1 rounded hover-surface transition-colors"
-                        style={{ color: colors.text.disabled.onLight }}
-                      >
-                        <X size={12} />
-                      </button>
-
-                      <div className="space-y-2">
-                        {a.changes.map((c, ci) => (
-                          <div key={ci} className="flex items-start gap-2 text-xs">
-                            <span className="font-medium shrink-0 w-24 text-right" style={{ color: colors.text.lowEmphasis.onLight }}>
-                              {c.field}
-                            </span>
-                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                              {c.from && (
-                                <>
-                                  <span
-                                    className="line-through px-1.5 py-0.5 rounded truncate max-w-[120px]"
-                                    style={{
-                                      color: colors.text.important,
-                                      backgroundColor: isDark ? 'rgba(239,68,68,0.12)' : 'rgba(239,68,68,0.08)',
-                                    }}
-                                  >
-                                    {c.from}
-                                  </span>
-                                  <ArrowRight size={10} style={{ color: colors.text.disabled.onLight, flexShrink: 0 }} />
-                                </>
-                              )}
-                              <span
-                                className="px-1.5 py-0.5 rounded truncate max-w-[140px]"
-                                style={{
-                                  color: colors.text.success,
-                                  backgroundColor: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.08)',
-                                  fontWeight: 500,
-                                }}
-                              >
-                                {c.to}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate" style={{ color: colors.text.highEmphasis.onLight }}>{a.title}</p>
+                        <p className="text-xs" style={{ color: colors.text.lowEmphasis.onLight }}>{a.desc}</p>
                       </div>
+                      <span className="text-xs shrink-0 pt-0.5" style={{ color: colors.text.lowEmphasis.onLight }}>{a.time}</span>
+                    </button>
 
-                      {linkedProduct && onProductClick && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onProductClick(linkedProduct); }}
-                          className="mt-3 flex items-center gap-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                          style={{ color: colors.brand.default }}
-                        >
-                          View {linkedProduct.name}
-                          <ArrowRight size={12} />
-                        </button>
-                      )}
-                    </div>
-                  )}
+                    {isPopoverOpen && (
+                      <div
+                        ref={popoverRef}
+                        className="absolute left-0 right-0 top-0 z-50 rounded-xl shadow-lg overflow-hidden"
+                        style={{
+                          backgroundColor: colors.surface.light,
+                          border: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.04)',
+                        }}
+                      >
+                        {linkedProduct && (
+                          <div className="flex items-center gap-3 p-3" style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.04)' }}>
+                            <img
+                              src={linkedProduct.imageUrl}
+                              alt={linkedProduct.name}
+                              className="w-12 h-12 rounded-lg object-cover shrink-0"
+                              style={{ backgroundColor: colors.surface.lightDarker }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold truncate" style={{ color: colors.text.highEmphasis.onLight }}>{linkedProduct.name}</p>
+                              <p className="text-xs" style={{ color: colors.text.lowEmphasis.onLight }}>
+                                {linkedProduct.type === 'Bundle' ? `Bundle · ${linkedProduct.subProducts?.length ?? 0} products` : `${linkedProduct.category ?? ''} · ${linkedProduct.brands.join(', ')}`}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setActivePopover(null); }}
+                              className="p-1 rounded-lg hover-surface transition-colors shrink-0"
+                              style={{ color: colors.text.disabled.onLight }}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="p-3 space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-wider font-semibold mb-2" style={{ color: colors.text.lowEmphasis.onLight }}>
+                            What changed
+                          </p>
+                          {a.changes.map((c, ci) => (
+                            <div key={ci} className="flex items-center gap-2 text-xs">
+                              <span className="font-medium shrink-0" style={{ color: colors.text.lowEmphasis.onLight }}>
+                                {c.field}
+                              </span>
+                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                {c.from && (
+                                  <>
+                                    <span
+                                      className="line-through px-1.5 py-0.5 rounded truncate"
+                                      style={{
+                                        color: isDark ? '#fca5a5' : '#dc2626',
+                                        backgroundColor: isDark ? 'rgba(239,68,68,0.12)' : 'rgba(239,68,68,0.06)',
+                                      }}
+                                    >{c.from}</span>
+                                    <ArrowRight size={10} style={{ color: colors.text.disabled.onLight, flexShrink: 0 }} />
+                                  </>
+                                )}
+                                <span
+                                  className="px-1.5 py-0.5 rounded truncate font-medium"
+                                  style={{
+                                    color: isDark ? '#6ee7b7' : '#059669',
+                                    backgroundColor: isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.06)',
+                                  }}
+                                >{c.to}</span>
+                              </div>
+                            </div>
+                          ))}
+                          {linkedProduct && onProductClick && (
+                            <div style={{ marginTop: 24 }}>
+                              <button
+                                className="text-sm font-medium px-4 py-2 rounded-lg transition-colors hover:opacity-90"
+                                style={{
+                                  color: colors.brand.default,
+                                  backgroundColor: `${colors.brand.default}12`,
+                                }}
+                                onClick={(e) => { e.stopPropagation(); setActivePopover(null); onProductClick(linkedProduct); }}
+                              >
+                                View details
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}

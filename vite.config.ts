@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: 'localhost',
+        watch: {
+          usePolling: true,
+          interval: 500,
+        },
       },
       plugins: [mtrDesignSystemResolver(), react()],
       define: {
