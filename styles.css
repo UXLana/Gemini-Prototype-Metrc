@@ -85,7 +85,7 @@
   /* ───── Card surfaces ───── */
 
   .card {
-    @apply border rounded-2xl shadow-sm transition-colors;
+    @apply border rounded-2xl transition-colors;
   }
 
   /* ───── Badges (mirrors MTR DLS Badge component) ───── */
