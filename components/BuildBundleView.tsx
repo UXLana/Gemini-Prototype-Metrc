@@ -126,7 +126,7 @@ export const BuildBundleView: React.FC<BuildBundleViewProps> = ({
                 ))}
               </div>
 
-              {/* Add another product */}
+              {/* Add a product */}
               <div className="mt-6 relative" ref={addRef}>
                 <button
                   onClick={() => setAddDropdownOpen(!addDropdownOpen)}
@@ -134,7 +134,7 @@ export const BuildBundleView: React.FC<BuildBundleViewProps> = ({
                   style={{ color: colors.text.highEmphasis.onLight }}
                 >
                   <PlusCircle size={18} />
-                  Add another product
+                  {items.length === 0 ? 'Add a product' : 'Add another product'}
                   <ChevronDown size={14} style={{ color: colors.text.disabled.onLight }} />
                 </button>
 

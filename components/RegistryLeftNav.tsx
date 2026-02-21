@@ -36,7 +36,7 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
         ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
 
         md:relative md:translate-x-0 md:shadow-none md:z-auto
-        ${isOpen ? 'md:w-64' : 'md:w-[68px]'}
+        ${isOpen ? 'md:w-56' : 'md:w-[68px]'}
       `}
       style={{
         backgroundColor: colors.surface.light,
@@ -111,7 +111,7 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
           <button
             className="p-2 hover-surface rounded-lg"
             title="Settings"
-            style={{ color: colors.text.disabled.onLight }}
+            style={{ color: colors.text.lowEmphasis.onLight }}
           >
             <Settings size={20} />
           </button>
@@ -125,8 +125,8 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; la
   const colors = useAppColors();
   const { isDark } = useDarkMode();
 
-  const activeIconColor = isDark ? '#2EE5D9' : '#F5FFFB';
-  const activeTextColor = isDark ? '#25D094' : '#F5FFFB';
+  const activeIconColor = isDark ? '#F5FFFE' : 'rgba(255, 255, 255, 0.95)';
+  const activeTextColor = isDark ? '#F5FFFE' : colors.brand.default;
 
   return (
     <a

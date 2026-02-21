@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAppColors, useDarkMode } from './hooks/useDarkMode';
 import { 
   Search, Bell, Box, Plus, 
@@ -55,6 +55,18 @@ export default function App() {
   const [buildBundleOpen, setBuildBundleOpen] = useState(false);
   const [bundleName, setBundleName] = useState('');
   const [editingBundle, setEditingBundle] = useState<DashboardProduct | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  const totalItems = dashboardProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const pagedProducts = useMemo(
+    () => dashboardProducts.slice(startIndex, endIndex),
+    [dashboardProducts, startIndex, endIndex]
+  );
 
   const toggleSelectProduct = (id: string) => {
     setSelectedProductIds(prev => {
@@ -67,8 +79,10 @@ export default function App() {
 
   const toggleSelectAll = () => {
     setSelectedProductIds(prev => {
-      if (prev.size === dashboardProducts.length) return new Set();
-      return new Set(dashboardProducts.map(p => p.id));
+      const pageIds = pagedProducts.map(p => p.id);
+      const allSelected = pageIds.every(id => prev.has(id));
+      if (allSelected) return new Set();
+      return new Set(pageIds);
     });
   };
 
@@ -263,7 +277,7 @@ export default function App() {
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
                                 Register product
                             </Button>
-                            <Button emphasis="low" leftIcon={<Package size={16} color="rgba(37, 208, 148, 1)" />} onClick={() => setBundleModalOpen(true)} style={{ color: 'rgba(30, 174, 124, 1)' }}>
+                            <Button emphasis="low" leftIcon={<Package size={16} />} onClick={() => setBundleModalOpen(true)}>
                                 New bundle
                             </Button>
                         </div>
@@ -319,7 +333,7 @@ export default function App() {
                 {/* Product Grid / List */}
                 {viewMode === 'grid' ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5 gap-6 mb-8">
-                      {dashboardProducts.map(product => (
+                      {pagedProducts.map(product => (
                           <DashboardProductCard 
                               key={product.id} 
                               product={product}
@@ -332,7 +346,7 @@ export default function App() {
                 ) : (
                   <div className="mb-8">
                     <ProductListView
-                      products={dashboardProducts}
+                      products={pagedProducts}
                       columns={listColumns}
                       selectedIds={selectedProductIds}
                       onToggleSelect={toggleSelectProduct}
@@ -344,15 +358,32 @@ export default function App() {
 
                 {/* Pagination */}
                 <div className="flex flex-wrap items-center justify-end gap-6 text-sm" style={{ color: colors.text.lowEmphasis.onLight }}>
-                    <span>80–90 of 90</span>
-                    <div className="flex items-center gap-2">
-                        <span>10 per page</span>
-                        <ChevronDown size={14} />
+                    <span>{startIndex + 1}–{endIndex} of {totalItems}</span>
+                    <div className="flex items-center gap-2 relative">
+                        <select
+                          value={pageSize}
+                          onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                          className="appearance-none bg-transparent pr-5 cursor-pointer font-medium"
+                          style={{ color: 'inherit' }}
+                        >
+                          <option value={6}>6 per page</option>
+                          <option value={12}>12 per page</option>
+                          <option value={24}>24 per page</option>
+                        </select>
+                        <ChevronDown size={14} className="absolute right-0 pointer-events-none" />
                     </div>
-                    <span>Page 9 of 9</span>
+                    <span>Page {safePage} of {totalPages}</span>
                     <div className="flex items-center gap-2">
-                        <button className="p-1 hover-surface rounded disabled:opacity-50"><ChevronLeft size={16} /></button>
-                        <button className="p-1 hover-surface rounded disabled:opacity-50" disabled><ChevronRight size={16} /></button>
+                        <button
+                          className="p-1 hover-surface rounded disabled:opacity-50"
+                          disabled={safePage <= 1}
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        ><ChevronLeft size={16} /></button>
+                        <button
+                          className="p-1 hover-surface rounded disabled:opacity-50"
+                          disabled={safePage >= totalPages}
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        ><ChevronRight size={16} /></button>
                     </div>
                 </div>
             </div>
