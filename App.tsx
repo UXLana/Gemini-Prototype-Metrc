@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAppColors, useDarkMode } from './hooks/useDarkMode';
 import { 
   Search, Bell, Box, Plus, 
@@ -20,6 +20,7 @@ import { BundleNameModal } from './components/BundleNameModal';
 import { BuildBundleView, BundleItem } from './components/BuildBundleView';
 import { FilterDrawer } from './components/FilterDrawer';
 import { ActiveFilters } from './components/ActiveFilters';
+import { AppSwitcher } from './components/AppSwitcher';
 
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
@@ -39,6 +40,8 @@ export default function App() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, Set<string>>>({});
   const [activeTab, setActiveTab] = useState('all');
+  const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
+  const gripRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const mqMd = window.matchMedia('(min-width: 768px)');
@@ -208,12 +211,21 @@ export default function App() {
                 <Menu size={20} />
             </button>
             
-            <button
-              className="flex items-center gap-2 p-2 hover-surface rounded-lg transition-colors"
-              style={{ color: colors.text.lowEmphasis.onLight }}
-            >
-                <Grip size={20} />
-            </button>
+            <div className="relative">
+              <button
+                ref={gripRef}
+                onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
+                className="flex items-center gap-2 p-2 hover-surface rounded-lg transition-colors"
+                style={{ color: colors.text.lowEmphasis.onLight }}
+              >
+                  <Grip size={20} />
+              </button>
+              <AppSwitcher
+                isOpen={appSwitcherOpen}
+                onClose={() => setAppSwitcherOpen(false)}
+                anchorRef={gripRef}
+              />
+            </div>
             
             <button className="flex items-center gap-2 p-1.5 hover-surface rounded-lg transition-colors group ml-1">
                 <Avatar name="Jane Doe" size="xs" />

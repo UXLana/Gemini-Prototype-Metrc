@@ -17,6 +17,12 @@
     font-family: 'Inter', sans-serif;
   }
 
+  *:focus-visible {
+    outline: 3px solid #3086BF;
+    outline-offset: 2px;
+    border-radius: inherit;
+  }
+
   input, select, textarea {
     font-size: 0.875rem !important;
     line-height: 1.25rem !important;
@@ -49,8 +55,7 @@
 
   .focus-brand:focus {
     outline: none;
-    box-shadow: 0 0 0 1px var(--mtr-brand-default);
-    border-color: var(--mtr-brand-default);
+    box-shadow: 0 0 0 3px #3086BF;
   }
 
   /* ───── Form elements ───── */

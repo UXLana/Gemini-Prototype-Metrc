@@ -45,7 +45,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
       {activeChips.map(chip => (
         <div 
           key={`${chip.categoryId}-${chip.optionId}`}
-          className="flex items-center gap-1 pl-2 pr-1 py-1 rounded-full text-xs"
+          className="flex items-center gap-1 pl-2 pr-1 py-1 rounded-full text-sm"
           style={{ 
             backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)', 
             color: colors.text.highEmphasis.onLight

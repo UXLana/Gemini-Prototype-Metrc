@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import {
-  Home, Box, Layers, Settings, ArrowUpDown, X
+  Home, Box, Layers, Settings, ChevronDown, X, Check
 } from 'lucide-react';
 import { UseCase } from '../App';
 
@@ -79,34 +79,9 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
       {/* Footer */}
       <div
         className={`p-4 transition-all space-y-3 shrink-0 ${!isOpen ? 'flex flex-col items-center justify-center' : ''}`}
-        style={{
-          borderTop: `1px solid ${colors.border.lowEmphasis.onLight}`,
-          backgroundColor: colors.surface.lightDarker
-        }}
       >
         {isOpen ? (
-          <div className="space-y-2">
-            <label className="form-label px-2" style={{ color: colors.text.lowEmphasis.onLight }}>Prototype Mode</label>
-            <div className="relative">
-              <select
-                value={useCase}
-                onChange={(e) => onUseCaseChange(e.target.value as UseCase)}
-                className="form-select py-2 pl-3 pr-8 text-xs font-medium shadow-sm"
-                style={{
-                  backgroundColor: colors.surface.light,
-                  borderColor: colors.border.midEmphasis.onLight,
-                  color: colors.text.highEmphasis.onLight
-                }}
-              >
-                <option value="standard">Standard</option>
-                <option value="empty-search">Empty Search</option>
-                <option value="market-selection">Market Select</option>
-              </select>
-              <div className="absolute right-2 top-2.5 pointer-events-none" style={{ color: colors.text.disabled.onLight }}>
-                <ArrowUpDown size={12} />
-              </div>
-            </div>
-          </div>
+          <ModeMenu useCase={useCase} onUseCaseChange={onUseCaseChange} />
         ) : (
           <button
             className="p-2 hover-surface rounded-lg"
@@ -120,6 +95,80 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
     </aside>
   );
 };
+
+const MODE_OPTIONS: { value: UseCase; label: string }[] = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'empty-search', label: 'Empty Search' },
+  { value: 'market-selection', label: 'Market Select' },
+];
+
+function ModeMenu({ useCase, onUseCaseChange }: { useCase: UseCase; onUseCaseChange: (v: UseCase) => void }) {
+  const colors = useAppColors();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const current = MODE_OPTIONS.find(o => o.value === useCase)!;
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-[10px] font-medium tracking-wide mb-1.5 px-1" style={{ color: colors.text.lowEmphasis.onLight }}>
+        Prototype Mode
+      </label>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+        style={{
+          color: colors.text.highEmphasis.onLight,
+          backgroundColor: colors.hover.onLight,
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface.lightDarker}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.hover.onLight}
+      >
+        <span>{current.label}</span>
+        <ChevronDown
+          size={14}
+          style={{
+            color: colors.text.lowEmphasis.onLight,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 200ms ease',
+          }}
+        />
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full left-0 right-0 mb-1 rounded-lg overflow-hidden shadow-lg z-50"
+          style={{
+            backgroundColor: colors.surface.light,
+            border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+          }}
+        >
+          {MODE_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { onUseCaseChange(opt.value); setOpen(false); }}
+              className="flex items-center justify-between w-full px-3 py-2 text-xs transition-colors hover-surface"
+              style={{
+                color: opt.value === useCase ? colors.brand.default : colors.text.highEmphasis.onLight,
+                fontWeight: opt.value === useCase ? 600 : 400,
+              }}
+            >
+              <span>{opt.label}</span>
+              {opt.value === useCase && <Check size={14} style={{ color: colors.brand.default }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean }) {
   const colors = useAppColors();
