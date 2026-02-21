@@ -300,7 +300,7 @@ export default function App() {
 
 
                 {/* Toolbar */}
-                <div className="flex flex-col gap-2 mb-4">
+                <div className="flex flex-col mb-4" style={{ gap: 16 }}>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <TabBar
                             tabs={[
