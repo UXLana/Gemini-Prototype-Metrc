@@ -125,8 +125,8 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; la
   const colors = useAppColors();
   const { isDark } = useDarkMode();
 
-  const activeIconColor = isDark ? '#F5FFFE' : 'rgba(255, 255, 255, 0.95)';
-  const activeTextColor = isDark ? '#F5FFFE' : colors.brand.default;
+  const activeIconColor = isDark ? '#F5FFFE' : 'rgba(0, 0, 0, 0.95)';
+  const activeTextColor = isDark ? '#F5FFFE' : 'rgba(0, 0, 0, 0.95)';
 
   return (
     <a
