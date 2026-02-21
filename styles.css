@@ -37,18 +37,6 @@
 
 @layer components {
 
-  /* ───── Text links ───── */
-
-  .text-link {
-    color: #2563EB;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    cursor: pointer;
-  }
-  .text-link:hover {
-    color: #1D4ED8;
-  }
-
   /* ───── Theme-aware interactive utilities ───── */
 
   .hover-surface {
@@ -97,6 +85,22 @@
   .form-select:focus {
     box-shadow: 0 0 0 1px var(--mtr-brand-default);
     border-color: var(--mtr-brand-default);
+  }
+
+  /* ───── Tab overrides ───── */
+
+  [role="tab"] {
+    border-radius: 6px !important;
+    margin-bottom: 4px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    height: auto !important;
+  }
+
+  [role="tab"][aria-selected="true"] > span:last-child {
+    height: 2px !important;
+    border-radius: 1px !important;
+    bottom: -4px !important;
   }
 
   /* ───── Card surfaces ───── */
@@ -185,83 +189,4 @@
   .dropdown-item-selected {
     /* Colors applied inline via useColors() */
   }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Tab overrides — outside @layer so they beat inline styles from the DLS
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-[role="tab"] {
-  border-radius: 6px !important;
-  margin-bottom: 4px !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  height: auto !important;
-  transition: color 300ms cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-@keyframes tab-indicator-in {
-  from { opacity: 0; transform: scaleX(0.3); }
-  to   { opacity: 1; transform: scaleX(1); }
-}
-
-[role="tablist"] [role="tab"][aria-selected="true"] > span:last-child {
-  height: 2px !important;
-  border-radius: 1px !important;
-  bottom: -4px !important;
-  background-color: var(--mtr-brand-default) !important;
-  animation: tab-indicator-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-@keyframes tab-content-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.tab-content-animate {
-  animation: tab-content-in 300ms cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Chat FAB — gradient, animated border, elevation
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.fab-chat {
-  background: radial-gradient(circle at 35% 30%, var(--mtr-brand-light, #2cc08c) 0%, var(--mtr-brand-default) 55%, #0d5e41 100%);
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.18),
-    0 1.5px 4px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  position: relative;
-}
-
-.fab-chat::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  padding: 2px;
-  background: conic-gradient(
-    from 0deg,
-    var(--mtr-brand-default),
-    rgba(255, 255, 255, 0.6),
-    var(--mtr-brand-default),
-    rgba(255, 255, 255, 0.6),
-    var(--mtr-brand-default)
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: fab-border-spin 4s linear infinite;
-  opacity: 0.7;
-}
-
-.fab-chat:hover::before {
-  opacity: 1;
-}
-
-@keyframes fab-border-spin {
-  to { transform: rotate(360deg); }
 }

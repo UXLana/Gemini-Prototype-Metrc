@@ -45,4 +45,3 @@ export enum ViewState {
 
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 export type AppView = 'home' | 'products' | 'integrations';
-export type DotAnimation = 'pulse' | 'wind';
