@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAppColors } from '../hooks/useDarkMode';
-import { useColors } from 'mtr-design-system/styles/themes';
 import { Badge as DSBadge } from 'mtr-design-system/components';
 import { AppBadge as Badge } from './AppBadge';
 import { Layers, Package, Check } from 'lucide-react';
@@ -15,8 +14,9 @@ interface DashboardProductCardProps {
 
 export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ product, selected = false, onSelect, onClick }) => {
   const colors = useAppColors();
-  const lightColors = useColors();
-  const isBundle = product.type === 'Bundle';
+  const isBundle = product?.type === 'Bundle';
+
+  if (!product) return null;
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800";
@@ -31,12 +31,12 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
     >
       
       {/* Image Header Area */}
-      <div className="relative h-56 w-full group-hover:opacity-95 transition-opacity flex-none" style={{ backgroundColor: lightColors.surface.lightDarker }}>
+      <div className="relative h-56 w-full group-hover:opacity-95 transition-opacity flex-none" style={{ backgroundColor: colors.surface.lightDarker }}>
         <div className="absolute top-4 left-4 z-10" onClick={(e) => { e.stopPropagation(); onSelect?.(product.id); }}>
            <div className="check-indicator w-5 h-5 shadow-sm cursor-pointer"
-             style={selected ? { backgroundColor: lightColors.brand.default, borderColor: lightColors.brand.default } : { borderColor: lightColors.border.midEmphasis.onLight, backgroundColor: lightColors.surface.light }}
+             style={selected ? { backgroundColor: colors.brand.default, borderColor: colors.brand.default } : { borderColor: colors.border.midEmphasis.onLight, backgroundColor: colors.surface.light }}
            >
-             {selected && <Check size={14} style={{ color: lightColors.text.highEmphasis.onDark }} />}
+             {selected && <Check size={14} style={{ color: colors.text.highEmphasis.onDark }} />}
            </div>
         </div>
 
@@ -70,7 +70,7 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
             <div>
                <p className="section-label" style={{ color: colors.text.disabled.onLight }}>Brands</p>
                <div className="flex flex-wrap gap-2">
-                 {product.brands.map(brand => (
+                 {(product.brands || []).map(brand => (
                     <Badge key={brand} variant="subtle" color="neutral">{brand}</Badge>
                  ))}
                </div>
@@ -83,7 +83,7 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
                
                {isBundle ? (
                  <div className="flex flex-wrap gap-1.5">
-                    {product.subProducts?.slice(0, 3).map((p, i) => (
+                    {(product.subProducts || []).slice(0, 3).map((p, i) => (
                         <Badge key={i} variant="subtle" color="neutral">{p}</Badge>
                     ))}
                     {(product.subProducts?.length || 0) > 3 && (
@@ -104,12 +104,12 @@ export const DashboardProductCard: React.FC<DashboardProductCardProps> = ({ prod
             <p className="section-label" style={{ color: colors.text.disabled.onLight }}>Markets</p>
             <div className="flex items-center justify-between">
                 <div className="flex flex-wrap gap-1.5">
-                    {product.markets.slice(0, 2).map(m => (
+                    {(product.markets || []).slice(0, 2).map(m => (
                         <Badge key={m} variant="subtle" color="brand" size="sm">{m}</Badge>
                     ))}
                 </div>
                 <span className="text-[11px] font-medium" style={{ color: colors.text.lowEmphasis.onLight }}>
-                    {product.markets.length}/{product.totalMarkets} Markets
+                    {(product.markets || []).length}/{product.totalMarkets} Markets
                 </span>
             </div>
         </div>

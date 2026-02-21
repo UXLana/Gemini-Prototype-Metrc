@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import {
-  Home, Box, Layers, Settings, ChevronDown, X, Check
+  Home, Box, Puzzle, Settings, ChevronDown, X, Check
 } from 'lucide-react';
-import { UseCase } from '../App';
+import { UseCase, AppView } from '../types';
 
 interface RegistryLeftNavProps {
   isOpen: boolean;
@@ -12,6 +12,8 @@ interface RegistryLeftNavProps {
   useCase: UseCase;
   onUseCaseChange: (useCase: UseCase) => void;
   logo?: React.ReactNode;
+  currentView: AppView;
+  onViewChange: (view: AppView) => void;
 }
 
 export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
@@ -21,6 +23,8 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
   useCase,
   onUseCaseChange,
   logo,
+  currentView,
+  onViewChange,
 }) => {
   const colors = useAppColors();
 
@@ -71,9 +75,9 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
 
       {/* Navigation */}
       <nav className="flex-1 py-4 space-y-1 px-2 overflow-y-auto">
-        <NavItem icon={<Home size={20} />} label="Home" collapsed={!isOpen} />
-        <NavItem icon={<Box size={20} />} label="Products" active collapsed={!isOpen} />
-        <NavItem icon={<Layers size={20} />} label="Integrations" collapsed={!isOpen} />
+        <NavItem icon={<Home size={20} />} label="Home" active={currentView === 'home'} collapsed={!isOpen} onClick={() => onViewChange('home')} />
+        <NavItem icon={<Box size={20} />} label="Products" active={currentView === 'products'} collapsed={!isOpen} onClick={() => onViewChange('products')} />
+        <NavItem icon={<Puzzle size={20} />} label="Integrations" active={currentView === 'integrations'} collapsed={!isOpen} onClick={() => onViewChange('integrations')} />
       </nav>
 
       {/* Footer */}
@@ -170,7 +174,7 @@ function ModeMenu({ useCase, onUseCaseChange }: { useCase: UseCase; onUseCaseCha
   );
 }
 
-function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean }) {
+function NavItem({ icon, label, active, collapsed, onClick }: { icon: React.ReactNode; label: string; active?: boolean; collapsed?: boolean; onClick?: () => void }) {
   const colors = useAppColors();
   const { isDark } = useDarkMode();
 
@@ -180,6 +184,7 @@ function NavItem({ icon, label, active, collapsed }: { icon: React.ReactNode; la
   return (
     <a
       href="#"
+      onClick={(e) => { e.preventDefault(); onClick?.(); }}
       className={`
         flex items-center text-sm font-medium rounded-lg transition-all duration-200 group relative
         ${!active ? 'hover-surface-subtle' : ''}

@@ -11,7 +11,7 @@ import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductListView, DEFAULT_COLUMNS, ProductColumn } from './components/ProductListView';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button, Avatar, TabBar } from 'mtr-design-system/components';
-import { Product, DashboardProduct } from './types';
+import { Product, DashboardProduct, UseCase, AppView } from './types';
 import { EditProductView } from './components/EditProductView';
 import { Toast } from './components/Toast';
 import { CanopyLogo } from './components/CanopyLogo';
@@ -21,18 +21,24 @@ import { BuildBundleView, BundleItem } from './components/BuildBundleView';
 import { FilterDrawer } from './components/FilterDrawer';
 import { ActiveFilters } from './components/ActiveFilters';
 import { AppSwitcher } from './components/AppSwitcher';
+import { RegistryHomePage } from './components/RegistryHomePage';
+import { IntegrationsPage } from './components/IntegrationsPage';
+import { StatsRow } from './components/StatsRow';
 
-export type UseCase = 'standard' | 'empty-search' | 'market-selection';
+// export type UseCase = 'standard' | 'empty-search' | 'market-selection';
+// export type AppView = 'home' | 'products' | 'integrations';
 
 export default function App() {
   const colors = useAppColors();
+
+  const [currentView, setCurrentView] = useState<AppView>('home');
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [useCase, setUseCase] = useState<UseCase>('standard');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
   const [isSidebarOpen, setSidebarOpen] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth >= 768;
+      return window.innerWidth >= 1280;
     }
     return false;
   });
@@ -45,21 +51,21 @@ export default function App() {
 
   useEffect(() => {
     const mqMd = window.matchMedia('(min-width: 768px)');
-    const mqLg = window.matchMedia('(min-width: 1024px)');
+    const mqXl = window.matchMedia('(min-width: 1280px)');
     const handleResize = () => {
       if (!mqMd.matches) {
         setSidebarOpen(false);
-      } else if (!mqLg.matches) {
+      } else if (!mqXl.matches) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
       }
     };
     mqMd.addEventListener('change', handleResize);
-    mqLg.addEventListener('change', handleResize);
+    mqXl.addEventListener('change', handleResize);
     return () => {
       mqMd.removeEventListener('change', handleResize);
-      mqLg.removeEventListener('change', handleResize);
+      mqXl.removeEventListener('change', handleResize);
     };
   }, []);
 
@@ -289,6 +295,8 @@ export default function App() {
           onToggle={() => setSidebarOpen(!isSidebarOpen)}
           useCase={useCase}
           onUseCaseChange={setUseCase}
+          currentView={currentView}
+          onViewChange={setCurrentView}
           logo={
             <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 transition-transform hover:scale-105">
               <img src="/logo.png" alt="GCR" className="w-full h-full object-contain" />
@@ -301,6 +309,11 @@ export default function App() {
           className="flex-1 flex flex-col overflow-y-auto relative transition-colors"
           style={{ backgroundColor: colors.surface.lightDarker }}
         >
+          {currentView === 'home' ? (
+            <RegistryHomePage onNavigateToProducts={() => setCurrentView('products')} />
+          ) : currentView === 'integrations' ? (
+            <IntegrationsPage />
+          ) : (
             <div className="p-4 md:p-8 max-w-[1900px] mx-auto w-full">
                 <div className="mb-8 mt-2">
                     <h1 className="text-3xl font-bold mb-2" style={{ color: colors.text.highEmphasis.onLight }}>Products</h1>
@@ -308,7 +321,7 @@ export default function App() {
                 </div>
 
                 {/* Stats Row */}
-                <StatsRow />
+                <StatsRow title="Product stats" stats={PRODUCT_STATS} />
 
 
                 {/* Toolbar */}
@@ -478,6 +491,7 @@ export default function App() {
                     </div>
                 </div>
             </div>
+          )}
         </main>
       </div>
 
@@ -570,63 +584,12 @@ export default function App() {
   );
 }
 
-const STATS = [
+const PRODUCT_STATS = [
   { label: 'Have gaps', value: '11', icon: <FileText size={20} /> },
   { label: 'Total products', value: '74', icon: <Box size={20} /> },
   { label: 'Drafts', value: '2', icon: <FileText size={20} /> },
   { label: 'Active', value: '65', icon: <Box size={20} /> },
 ];
-
-function StatsRow() {
-  const colors = useAppColors();
-  const [expanded, setExpanded] = useState(false);
-  const [isSmall, setIsSmall] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    setIsSmall(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsSmall(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  const showCards = !isSmall || expanded;
-
-  return (
-    <div style={{ marginBottom: 56 }}>
-      <div className="flex items-center justify-between" style={{ marginBottom: 8, paddingLeft: 2 }}>
-        <h2 style={{ color: colors.text.lowEmphasis.onLight, fontSize: 12, fontWeight: 500, lineHeight: '16px', letterSpacing: '0.2px' }}>Product stats</h2>
-        {isSmall && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs font-medium"
-            style={{ color: colors.brand.default }}
-          >
-            {expanded ? 'Collapse' : `View all (${STATS.length})`}
-            <ChevronDown size={14} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }} />
-          </button>
-        )}
-      </div>
-      {showCards && (
-        <div className="flex gap-4 overflow-x-auto">
-          {STATS.map(stat => (
-            <div
-              key={stat.label}
-              className="card p-4 flex items-start gap-4 shrink-0 flex-1 min-w-[180px]"
-              style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}
-            >
-              <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface.lightDarker, color: colors.text.disabled.onLight }}>{stat.icon}</div>
-              <div>
-                <p className="text-sm mb-1" style={{ color: colors.text.lowEmphasis.onLight }}>{stat.label}</p>
-                <p className="text-2xl font-bold" style={{ color: colors.text.highEmphasis.onLight }}>{stat.value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function IconButton({ children, active, onClick, title }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string }) {
     const colors = useAppColors();

@@ -2,6 +2,62 @@ import { createContext, useContext, useState, useEffect, useMemo, type ReactNode
 import { useColors } from 'mtr-design-system/styles/themes';
 import type { ThemeColors } from 'mtr-design-system/styles/themes';
 
+const fallbackTheme: ThemeColors = {
+  brand: { default: '#17978E', lighter: '#5EEAD4', darker: '#134E4A' },
+  surface: {
+    light: '#ffffff',
+    lightDarker: '#F9FAFB',
+    dark: '#1e1e1e',
+    darkDarker: '#181818',
+    disabled: { onLight: '#f3f4f6', onDark: '#374151' }
+  },
+  text: {
+    highEmphasis: { onLight: '#111827', onDark: '#f9fafb' },
+    lowEmphasis: { onLight: '#6b7280', onDark: '#9ca3af' },
+    disabled: { onLight: '#9ca3af', onDark: '#6b7280' },
+    important: '#ef4444',
+    warning: '#f59e0b',
+    success: '#10b981'
+  },
+  border: {
+    lowEmphasis: { onLight: '#e5e7eb', onDark: '#374151', hover: { onLight: '#d1d5db', onDark: '#4b5563' } },
+    midEmphasis: { onLight: '#d1d5db', onDark: '#4b5563' },
+    highEmphasis: { onLight: '#9ca3af', onDark: '#6b7280' }
+  },
+  icon: {
+    enabled: { onLight: '#4b5563', onDark: '#9ca3af' },
+    hover: { onLight: '#111827' },
+    active: { onLight: '#000000' },
+    selected: { onLight: '#17978E' },
+    disabled: { onLight: '#d1d5db', onDark: '#4b5563' },
+    lowEmphasis: { enabled: { onLight: '#9ca3af', onDark: '#6b7280' } }
+  },
+  hover: { onLight: '#f3f4f6', onDark: '#374151' },
+  selected: { onLight: '#e5e7eb' },
+  scrim: 'rgba(0, 0, 0, 0.5)',
+  action: {
+    monochrome: {
+      onLight: {
+        enabled: '#4b5563',
+        hover: '#111827',
+        active: '#000000',
+        selected: '#17978E',
+        disabled: '#d1d5db',
+        bg: 'transparent'
+      }
+    }
+  },
+  scrollbar: {
+    enabled: { onLight: '#d1d5db', onDark: '#4b5563' },
+    hover: { onLight: '#9ca3af', onDark: '#6b7280' },
+    active: { onLight: '#6b7280', onDark: '#9ca3af' }
+  },
+  navItemText: {
+    enabled: { onLight: '#4b5563', onDark: '#9ca3af' }
+  },
+  focusBorder: { onLight: '#17978E', onDark: '#5EEAD4' }
+} as ThemeColors;
+
 interface DarkModeContextValue {
   isDark: boolean;
   toggle: () => void;
@@ -52,6 +108,7 @@ const dark = {
 };
 
 function buildDarkOverrides(base: ThemeColors): ThemeColors {
+  if (!base) return fallbackTheme;
   return {
     ...base,
 
@@ -133,7 +190,7 @@ function buildDarkOverrides(base: ThemeColors): ThemeColors {
 }
 
 export function useAppColors(): ThemeColors {
-  const base = useColors();
+  const base = useColors() || fallbackTheme;
   const { isDark } = useDarkMode();
   return useMemo(() => isDark ? buildDarkOverrides(base) : base, [base, isDark]);
 }

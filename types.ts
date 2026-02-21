@@ -42,3 +42,6 @@ export enum ViewState {
   MARKET_SELECTION = 'MARKET_SELECTION',
   EDIT = 'EDIT',
 }
+
+export type UseCase = 'standard' | 'empty-search' | 'market-selection';
+export type AppView = 'home' | 'products' | 'integrations';
