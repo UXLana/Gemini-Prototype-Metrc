@@ -36,8 +36,7 @@ export function StatsRow({ title, stats, bottomMargin = 56 }: StatsRowProps) {
         {isSmall && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-xs font-medium"
-            style={{ color: colors.brand.default }}
+            className="flex items-center gap-1 text-xs font-medium text-link"
           >
             {expanded ? 'Collapse' : `View all (${stats.length})`}
             <ChevronDown size={14} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }} />

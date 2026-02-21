@@ -527,7 +527,7 @@ export const EditProductView: React.FC<EditProductViewProps> = ({ product, onSav
                       </div>
 
                       <div className="pt-6">
-                        <button className="text-xs font-bold hover:underline" style={{ color: colors.text.important }}>Archive product</button>
+                        <button className="text-xs font-bold text-link">Archive product</button>
                       </div>
                     </div>
                   </div>

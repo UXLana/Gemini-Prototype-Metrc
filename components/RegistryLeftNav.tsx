@@ -3,7 +3,7 @@ import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import {
   Home, Box, Puzzle, Settings, ChevronDown, X, Check
 } from 'lucide-react';
-import { UseCase, AppView } from '../types';
+import { UseCase, AppView, DotAnimation } from '../types';
 
 interface RegistryLeftNavProps {
   isOpen: boolean;
@@ -11,6 +11,8 @@ interface RegistryLeftNavProps {
   onToggle: () => void;
   useCase: UseCase;
   onUseCaseChange: (useCase: UseCase) => void;
+  dotAnimation: DotAnimation;
+  onDotAnimationChange: (v: DotAnimation) => void;
   logo?: React.ReactNode;
   currentView: AppView;
   onViewChange: (view: AppView) => void;
@@ -22,6 +24,8 @@ export const RegistryLeftNav: React.FC<RegistryLeftNavProps> = ({
   onToggle,
   useCase,
   onUseCaseChange,
+  dotAnimation,
+  onDotAnimationChange,
   logo,
   currentView,
   onViewChange,
@@ -166,6 +170,79 @@ function ModeMenu({ useCase, onUseCaseChange }: { useCase: UseCase; onUseCaseCha
             >
               <span>{opt.label}</span>
               {opt.value === useCase && <Check size={14} style={{ color: colors.brand.default }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const ANIM_OPTIONS: { value: DotAnimation; label: string }[] = [
+  { value: 'pulse', label: 'Pulse' },
+  { value: 'wind', label: 'Wind Drift' },
+];
+
+function AnimationMenu({ dotAnimation, onDotAnimationChange }: { dotAnimation: DotAnimation; onDotAnimationChange: (v: DotAnimation) => void }) {
+  const colors = useAppColors();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const current = ANIM_OPTIONS.find(o => o.value === dotAnimation)!;
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-[10px] font-medium tracking-wide mb-1.5 px-1" style={{ color: colors.text.lowEmphasis.onLight }}>
+        Chat Animation
+      </label>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+        style={{
+          color: colors.text.highEmphasis.onLight,
+          backgroundColor: colors.hover.onLight,
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colors.surface.lightDarker}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.hover.onLight}
+      >
+        <span>{current.label}</span>
+        <ChevronDown
+          size={14}
+          style={{
+            color: colors.text.lowEmphasis.onLight,
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 200ms ease',
+          }}
+        />
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full left-0 right-0 mb-1 rounded-lg overflow-hidden shadow-lg z-50"
+          style={{
+            backgroundColor: colors.surface.light,
+            border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+          }}
+        >
+          {ANIM_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { onDotAnimationChange(opt.value); setOpen(false); }}
+              className="flex items-center justify-between w-full px-3 py-2 text-xs transition-colors hover-surface"
+              style={{
+                color: opt.value === dotAnimation ? colors.brand.default : colors.text.highEmphasis.onLight,
+                fontWeight: opt.value === dotAnimation ? 600 : 400,
+              }}
+            >
+              <span>{opt.label}</span>
+              {opt.value === dotAnimation && <Check size={14} style={{ color: colors.brand.default }} />}
             </button>
           ))}
         </div>

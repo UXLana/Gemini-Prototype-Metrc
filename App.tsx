@@ -11,7 +11,7 @@ import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductListView, DEFAULT_COLUMNS, ProductColumn } from './components/ProductListView';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
 import { Button, Avatar, TabBar } from 'mtr-design-system/components';
-import { Product, DashboardProduct, UseCase, AppView } from './types';
+import { Product, DashboardProduct, UseCase, AppView, DotAnimation } from './types';
 import { EditProductView } from './components/EditProductView';
 import { Toast } from './components/Toast';
 import { CanopyLogo } from './components/CanopyLogo';
@@ -24,6 +24,7 @@ import { AppSwitcher } from './components/AppSwitcher';
 import { RegistryHomePage } from './components/RegistryHomePage';
 import { IntegrationsPage } from './components/IntegrationsPage';
 import { StatsRow } from './components/StatsRow';
+import { ChatPanel } from './components/ChatPanel';
 
 // export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 // export type AppView = 'home' | 'products' | 'integrations';
@@ -49,6 +50,10 @@ export default function App() {
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const gripRef = useRef<HTMLButtonElement>(null);
 
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatExpanded, setChatExpanded] = useState(false);
+  const [dotAnimation, setDotAnimation] = useState<DotAnimation>('pulse');
+
   useEffect(() => {
     const mqMd = window.matchMedia('(min-width: 768px)');
     const mqXl = window.matchMedia('(min-width: 1280px)');
@@ -68,6 +73,12 @@ export default function App() {
       mqXl.removeEventListener('change', handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (chatOpen) {
+      setSidebarOpen(false);
+    }
+  }, [chatOpen]);
 
   const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
   const [toast, setToast] = useState<{ message: string, visible: boolean }>({ message: '', visible: false });
@@ -240,23 +251,23 @@ export default function App() {
             </button>
         </div>
 
-        {/* Center Section: Search Bar */}
+        {/* Center Section: Search Bar (triggers chat panel) */}
         <div className="flex-1 flex justify-center px-4 lg:px-8">
-            <div className="w-full max-w-xl relative hidden md:block">
-                <input 
-                type="text" 
-                placeholder="Find or ask about a product or integration" 
-                className="w-full pl-4 pr-10 py-2 rounded-full border focus-brand outline-none text-sm transition-all"
+            {!chatOpen && (
+              <button
+                onClick={() => { setChatOpen(true); setChatExpanded(false); }}
+                className="w-full max-w-xl relative hidden md:flex items-center rounded-full border text-sm transition-all cursor-pointer text-left"
                 style={{
                   backgroundColor: colors.surface.lightDarker,
                   borderColor: colors.border.lowEmphasis.onLight,
-                  color: colors.text.highEmphasis.onLight
+                  color: colors.text.disabled.onLight,
+                  padding: '8px 16px',
                 }}
-                />
-                <div className="absolute right-3 top-2.5" style={{ color: colors.text.disabled.onLight }}>
-                    <Search size={16} />
-                </div>
-            </div>
+              >
+                <span className="flex-1">Find or ask about a product or integration</span>
+                <Search size={16} />
+              </button>
+            )}
         </div>
 
         {/* Right Section */}
@@ -295,8 +306,10 @@ export default function App() {
           onToggle={() => setSidebarOpen(!isSidebarOpen)}
           useCase={useCase}
           onUseCaseChange={setUseCase}
+          dotAnimation={dotAnimation}
+          onDotAnimationChange={setDotAnimation}
           currentView={currentView}
-          onViewChange={setCurrentView}
+          onViewChange={(view) => { setChatExpanded(false); setCurrentView(view); }}
           logo={
             <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 transition-transform hover:scale-105">
               <img src="/logo.png" alt="GCR" className="w-full h-full object-contain" />
@@ -306,11 +319,11 @@ export default function App() {
 
         {/* Main Content */}
         <main
-          className="flex-1 flex flex-col overflow-y-auto relative transition-colors"
+          className={`flex-1 flex flex-col overflow-y-auto relative transition-colors min-w-0 ${chatOpen && chatExpanded ? 'hidden' : ''}`}
           style={{ backgroundColor: colors.surface.lightDarker }}
         >
           {currentView === 'home' ? (
-            <RegistryHomePage onNavigateToProducts={() => setCurrentView('products')} />
+            <RegistryHomePage onNavigateToProducts={() => setCurrentView('products')} chatOpen={chatOpen} />
           ) : currentView === 'integrations' ? (
             <IntegrationsPage />
           ) : (
@@ -335,12 +348,13 @@ export default function App() {
                             ]}
                             activeTab={activeTab}
                             onTabChange={setActiveTab}
+                            iconPosition="leading"
                             align="left"
                             hasDivider={false}
                             onDark={isDarkMode}
                         />
                         <div className="pb-2 flex gap-2">
-                            <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
+                            <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)} style={{ backgroundColor: 'var(--mtr-brand-default)' }}>
                                 Register product
                             </Button>
                             <Button 
@@ -435,8 +449,9 @@ export default function App() {
                 />
 
                 {/* Product Grid / List */}
+                <div key={activeTab} className="tab-content-animate">
                 {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5 gap-6 mb-8">
+                  <div className={`grid gap-6 mb-8 grid-cols-1 sm:grid-cols-2 ${chatOpen ? 'lg:grid-cols-2 xl:grid-cols-3 min-[1700px]:grid-cols-4' : 'lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5'}`}>
                       {pagedProducts.map(product => (
                           <DashboardProductCard 
                               key={product.id} 
@@ -459,6 +474,7 @@ export default function App() {
                     />
                   </div>
                 )}
+                </div>
 
                 {/* Pagination */}
                 <div className="flex flex-wrap items-center justify-end gap-6 text-sm" style={{ color: colors.text.lowEmphasis.onLight }}>
@@ -492,7 +508,31 @@ export default function App() {
                 </div>
             </div>
           )}
+
+          {/* FAB: Chat trigger */}
+          {!chatOpen && (
+            <button
+              onClick={() => { setChatOpen(true); setChatExpanded(false); }}
+              className="fab-chat fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full flex items-center justify-center focus:outline-none focus-brand transition-transform hover:scale-110 active:scale-95"
+              aria-label="Open chat"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L13.09 8.26L18 5L14.74 9.91L21 11L14.74 12.09L18 17L13.09 13.74L12 20L10.91 13.74L6 17L9.26 12.09L3 11L9.26 9.91L6 5L10.91 8.26L12 2Z" fill="white" opacity="0.9"/>
+                <path d="M12 6L12.72 9.28L16 8L13.28 10.72L16.5 11.5L13.28 12.28L16 15L12.72 12.72L12 16L11.28 12.72L8 15L10.72 12.28L7.5 11.5L10.72 10.72L8 8L11.28 9.28L12 6Z" fill="white"/>
+              </svg>
+            </button>
+          )}
         </main>
+
+        {/* Chat Panel */}
+        <ChatPanel
+          isOpen={chatOpen}
+          isExpanded={chatExpanded}
+          onClose={() => { setChatOpen(false); setChatExpanded(false); }}
+          onToggleExpand={() => { if (!chatExpanded) setSidebarOpen(false); setChatExpanded(!chatExpanded); }}
+          dotAnimation={dotAnimation}
+          onDotAnimationChange={setDotAnimation}
+        />
       </div>
 
       {isRegistrationModalOpen && (

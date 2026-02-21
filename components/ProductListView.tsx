@@ -53,8 +53,7 @@ const CELL_RENDERERS: Record<string, {
     render: (product, colors, onProductClick) => (
       <button
         onClick={() => onProductClick?.(product)}
-        className="font-medium text-left hover:underline transition-colors"
-        style={{ color: colors.brand.default }}
+        className="font-medium text-left text-link transition-colors"
       >
         {product.name}
       </button>
