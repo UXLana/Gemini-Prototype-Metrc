@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { DotAnimation } from '../types';
 import { DotGrid } from './DotGrid';
+import { chatWithBuddy, RateLimitError, type GeminiMessage } from '../lib/gemini';
 
 // ─── Agent identity ───────────────────────────────────────────────────────────
 
@@ -203,10 +204,10 @@ interface ChatMessage {
   structured?: AssistantPayload;
 }
 
-// ─── Simulated responses ──────────────────────────────────────────────────────
+// ─── Demo fallback responses (used when Gemini API is rate-limited) ───────────
 
-const MOCK_RESPONSES: Record<string, AssistantPayload> = {
-  'Find all products with missing data': {
+const FALLBACK_RESPONSES: Record<string, AssistantPayload> = {
+  'find all products with missing data': {
     text: '12 products have incomplete data that blocks publishing.',
     components: [
       {
@@ -242,7 +243,7 @@ const MOCK_RESPONSES: Record<string, AssistantPayload> = {
     ],
   },
 
-  'Register a new product for me': {
+  'register a new product for me': {
     text: "Let's get your new product registered. Here's where we are:",
     components: [
       {
@@ -265,7 +266,7 @@ const MOCK_RESPONSES: Record<string, AssistantPayload> = {
     ],
   },
 
-  'Which products are not in any market yet?': {
+  'which products are not in any market yet?': {
     text: '3 products have no market assignments.',
     components: [
       {
@@ -298,7 +299,7 @@ const MOCK_RESPONSES: Record<string, AssistantPayload> = {
     ],
   },
 
-  'Create a bundle from my top sellers': {
+  'create a bundle from my top sellers': {
     text: 'Here are your current top-selling products. Select which ones to bundle:',
     components: [
       {
@@ -325,8 +326,8 @@ const MOCK_RESPONSES: Record<string, AssistantPayload> = {
     ],
   },
 
-  'Show me recent activity across all markets': {
-    text: 'Here's a snapshot of your registry activity this week.',
+  'show me recent activity across all markets': {
+    text: "Here's a snapshot of your registry activity this week.",
     components: [
       {
         type: 'STAT_CARDS',
@@ -355,14 +356,27 @@ const MOCK_RESPONSES: Record<string, AssistantPayload> = {
   },
 };
 
-const DEFAULT_RESPONSE: AssistantPayload = {
-  text: "I can help with that. Here's what I can do for you:",
+const DEFAULT_FALLBACK: AssistantPayload = {
+  text: "I'm currently in demo mode. Here's what I can help with:",
   actions: [
     { label: 'Find products with missing data', action: 'QUERY_MISSING' },
     { label: 'Register a new product', action: 'OPEN_REGISTRATION' },
     { label: 'Show market overview', action: 'MARKET_OVERVIEW' },
   ],
 };
+
+function getFallbackResponse(input: string): AssistantPayload {
+  const key = input.toLowerCase().trim();
+  if (FALLBACK_RESPONSES[key]) return FALLBACK_RESPONSES[key];
+
+  for (const [k, v] of Object.entries(FALLBACK_RESPONSES)) {
+    const words = k.split(/\s+/);
+    const matchCount = words.filter((w) => key.includes(w)).length;
+    if (matchCount >= words.length * 0.5) return v;
+  }
+
+  return DEFAULT_FALLBACK;
+}
 
 // ─── Conversation starters ────────────────────────────────────────────────────
 
@@ -556,7 +570,7 @@ export function ChatPanel({ isOpen, isExpanded, onClose, onToggleExpand, dotAnim
     }
   }, [messages, isTyping]);
 
-  const sendMessage = useCallback((text: string) => {
+  const sendMessage = useCallback(async (text: string) => {
     if (!text.trim()) return;
 
     const userMsg: ChatMessage = { role: 'user', content: text.trim() };
@@ -564,19 +578,57 @@ export function ChatPanel({ isOpen, isExpanded, onClose, onToggleExpand, dotAnim
     setMessage('');
     setIsTyping(true);
 
-    const matched = MOCK_RESPONSES[text.trim()];
-    const response = matched ?? DEFAULT_RESPONSE;
+    try {
+      const geminiHistory: GeminiMessage[] = [
+        ...messages.map((m) => ({
+          role: (m.role === 'user' ? 'user' : 'model') as 'user' | 'model',
+          parts: [{ text: m.content || (m.structured ? JSON.stringify(m.structured) : '') }],
+        })),
+        { role: 'user' as const, parts: [{ text: text.trim() }] },
+      ];
 
-    setTimeout(() => {
+      const raw = await chatWithBuddy(BUDDY_SYSTEM_PROMPT, geminiHistory);
+
+      let structured: AssistantPayload;
+      try {
+        structured = JSON.parse(raw);
+      } catch {
+        structured = { text: raw };
+      }
+
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: response.text ?? '',
-        structured: response,
+        content: structured.text ?? raw,
+        structured,
       };
       setMessages((prev) => [...prev, assistantMsg]);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        const fallback = getFallbackResponse(text.trim());
+        const assistantMsg: ChatMessage = {
+          role: 'assistant',
+          content: fallback.text ?? '',
+          structured: fallback,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+      } else {
+        const errorMsg: ChatMessage = {
+          role: 'assistant',
+          content: `Sorry, I couldn't process that. ${err instanceof Error ? err.message : 'Please try again.'}`,
+          structured: {
+            text: `Sorry, I couldn't process that. ${err instanceof Error ? err.message : 'Please try again.'}`,
+            components: [{
+              type: 'BANNER',
+              props: { variant: 'error', title: 'Connection error', description: 'Failed to reach the Gemini API. Check your network or API key.' },
+            }],
+          },
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+      }
+    } finally {
       setIsTyping(false);
-    }, 800 + Math.random() * 600);
-  }, []);
+    }
+  }, [messages]);
 
   const handleSend = useCallback(() => {
     sendMessage(message);
