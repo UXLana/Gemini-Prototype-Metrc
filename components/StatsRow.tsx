@@ -52,7 +52,7 @@ export function StatsRow({ title, stats, bottomMargin = 56 }: StatsRowProps) {
               className="card p-4 flex items-start gap-4 shrink-0 flex-1 min-w-[180px]"
               style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}
             >
-              <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface.lightDarker, color: colors.text.disabled.onLight }}>{stat.icon}</div>
+              <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface.lightDarker, color: colors.brand.default }}>{stat.icon}</div>
               <div>
                 <p className="text-sm mb-1" style={{ color: colors.text.lowEmphasis.onLight }}>{stat.label}</p>
                 <p className="text-2xl font-bold" style={{ color: colors.text.highEmphasis.onLight }}>{stat.value}</p>

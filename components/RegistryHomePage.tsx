@@ -49,12 +49,14 @@ export function RegistryHomePage({ onNavigateToProducts }: RegistryHomePageProps
       {/* Page Header */}
       <div
         className="rounded-2xl px-8 py-8 mb-8"
-        style={{ backgroundColor: colors.brand.default }}
+        style={{
+          backgroundColor: isDark ? `${colors.brand.default}25` : colors.brand.default,
+        }}
       >
-        <h1 className="text-2xl font-bold mb-1" style={{ color: '#fff' }}>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: isDark ? colors.text.highEmphasis.onLight : '#fff' }}>
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, Jane
         </h1>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+        <p className="text-sm" style={{ color: isDark ? 'rgba(255,255,255,0.87)' : 'rgba(255,255,255,0.7)' }}>
           Here's what's happening in your registry today.
         </p>
       </div>
