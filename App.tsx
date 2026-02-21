@@ -10,7 +10,7 @@ import { DASHBOARD_PRODUCTS } from './constants';
 import { DashboardProductCard } from './components/DashboardProductCard';
 import { ProductListView, DEFAULT_COLUMNS, ProductColumn } from './components/ProductListView';
 import { ProductRegistrationFlow } from './components/ProductRegistrationFlow';
-import { Button, Avatar } from 'mtr-design-system/components';
+import { Button, Avatar, TabBar } from 'mtr-design-system/components';
 import { Product, DashboardProduct } from './types';
 import { EditProductView } from './components/EditProductView';
 import { Toast } from './components/Toast';
@@ -38,14 +38,26 @@ export default function App() {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Record<string, Set<string>>>({});
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    const handler = (e: MediaQueryListEvent) => {
-      if (!e.matches) setSidebarOpen(false);
+    const mqMd = window.matchMedia('(min-width: 768px)');
+    const mqLg = window.matchMedia('(min-width: 1024px)');
+    const handleResize = () => {
+      if (!mqMd.matches) {
+        setSidebarOpen(false);
+      } else if (!mqLg.matches) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true);
+      }
     };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    mqMd.addEventListener('change', handleResize);
+    mqLg.addEventListener('change', handleResize);
+    return () => {
+      mqMd.removeEventListener('change', handleResize);
+      mqLg.removeEventListener('change', handleResize);
+    };
   }, []);
 
   const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode();
@@ -63,14 +75,35 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
-  const totalItems = dashboardProducts.length;
+  const filteredProducts = useMemo(() => {
+    if (Object.keys(activeFilters).length === 0) return dashboardProducts;
+    return dashboardProducts.filter(product => {
+      return Object.entries(activeFilters).every(([categoryId, selectedIds]) => {
+        if (selectedIds.size === 0) return true;
+        switch (categoryId) {
+          case 'brand':
+            return product.brands.some(b => selectedIds.has(b.toLowerCase().replace(/[\s\/]+/g, '_')));
+          case 'category':
+            return product.category ? selectedIds.has(product.category.toLowerCase()) : false;
+          case 'status':
+            return product.status ? selectedIds.has(product.status.toLowerCase()) : selectedIds.has('active');
+          case 'type':
+            return selectedIds.has(product.type.toLowerCase());
+          default:
+            return true;
+        }
+      });
+    });
+  }, [dashboardProducts, activeFilters]);
+
+  const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const startIndex = (safePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
   const pagedProducts = useMemo(
-    () => dashboardProducts.slice(startIndex, endIndex),
-    [dashboardProducts, startIndex, endIndex]
+    () => filteredProducts.slice(startIndex, endIndex),
+    [filteredProducts, startIndex, endIndex]
   );
 
   const toggleSelectProduct = (id: string) => {
@@ -263,27 +296,34 @@ export default function App() {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                    <StatCard label="Have gaps" value="11" icon={<FileText size={20} />} />
-                    <StatCard label="Total products" value="74" icon={<Box size={20} />} />
-                    <StatCard label="Drafts" value="2" icon={<FileText size={20} />} />
-                    <StatCard label="Active" value="65" icon={<Box size={20} />} />
-                </div>
+                <StatsRow />
+
 
                 {/* Toolbar */}
-                <div className="flex flex-col gap-2 mb-6">
+                <div className="flex flex-col gap-2 mb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex gap-6 overflow-x-auto pb-1 ml-2">
-                            <TabButton active>All</TabButton>
-                            <TabButton>Active</TabButton>
-                            <TabButton>Archived</TabButton>
-                        </div>
+                        <TabBar
+                            tabs={[
+                                { id: 'all', label: 'All' },
+                                { id: 'active', label: 'Active' },
+                                { id: 'archived', label: 'Archived' },
+                            ]}
+                            activeTab={activeTab}
+                            onTabChange={setActiveTab}
+                            align="left"
+                            hasDivider={false}
+                        />
                         <div className="pb-2 flex gap-2">
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
                                 Register product
                             </Button>
-                            <Button emphasis="low" leftIcon={<Package size={16} />} onClick={() => setBundleModalOpen(true)} style={isDarkMode ? { color: 'rgba(27, 172, 121, 1)' } : undefined}>
-                                New bundle
+                            <Button 
+                                emphasis={selectedProductIds.size > 0 ? "mid" : "low"} 
+                                leftIcon={<Package size={16} />} 
+                                onClick={() => { if (selectedProductIds.size > 0) setBundleFromSelection(true); setBundleModalOpen(true); }} 
+                                style={isDarkMode && selectedProductIds.size === 0 ? { color: 'rgba(27, 172, 121, 1)' } : undefined}
+                            >
+                                {selectedProductIds.size > 0 ? 'New bundle from selected' : 'New bundle'}
                             </Button>
                         </div>
                     </div>
@@ -331,7 +371,15 @@ export default function App() {
                                 active={isFilterOpen || Object.keys(activeFilters).length > 0}
                                 title="Filter"
                             >
-                                <Filter size={16} />
+                                <span className="relative">
+                                    <Filter size={16} />
+                                    {Object.keys(activeFilters).length > 0 && (
+                                        <span 
+                                            className="absolute -right-0.5 rounded-full"
+                                            style={{ backgroundColor: colors.text.important, width: 6, height: 6, top: 0 }}
+                                        />
+                                    )}
+                                </span>
                             </IconButton>
                             <IconButton><ArrowUpDown size={16} /></IconButton>
                             <div className="h-6 w-px mx-1" style={{ backgroundColor: colors.border.lowEmphasis.onLight }}></div>
@@ -355,8 +403,9 @@ export default function App() {
                             }
                             return next;
                         });
+                        setCurrentPage(1);
                     }}
-                    onClearAll={() => setActiveFilters({})}
+                    onClearAll={() => { setActiveFilters({}); setCurrentPage(1); }}
                 />
 
                 {/* Product Grid / List */}
@@ -495,8 +544,8 @@ export default function App() {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         selectedFilters={activeFilters}
-        onApply={(filters) => setActiveFilters(filters)}
-        onReset={() => setActiveFilters({})}
+        onApply={(filters) => { setActiveFilters(filters); setCurrentPage(1); }}
+        onReset={() => { setActiveFilters({}); setCurrentPage(1); }}
       />
 
       <Toast 
@@ -508,35 +557,62 @@ export default function App() {
   );
 }
 
-function StatCard({ label, value, icon }: { label: string, value: string, icon: React.ReactNode }) {
-    const colors = useAppColors();
-    return (
-        <div
-          className="card p-4 flex items-start gap-4 h-fit"
-          style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}
-        >
-            <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface.lightDarker, color: colors.text.disabled.onLight }}>{icon}</div>
-            <div>
-                <p className="text-sm mb-1" style={{ color: colors.text.lowEmphasis.onLight }}>{label}</p>
-                <p className="text-2xl font-bold" style={{ color: colors.text.highEmphasis.onLight }}>{value}</p>
-            </div>
-        </div>
-    )
-}
+const STATS = [
+  { label: 'Have gaps', value: '11', icon: <FileText size={20} /> },
+  { label: 'Total products', value: '74', icon: <Box size={20} /> },
+  { label: 'Drafts', value: '2', icon: <FileText size={20} /> },
+  { label: 'Active', value: '65', icon: <Box size={20} /> },
+];
 
-function TabButton({ children, active }: { children?: React.ReactNode, active?: boolean }) {
-    const colors = useAppColors();
-    return (
-        <button
-          className="pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-          style={{
-            borderColor: active ? colors.brand.default : 'transparent',
-            color: active ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight
-          }}
-        >
-            {children}
-        </button>
-    )
+function StatsRow() {
+  const colors = useAppColors();
+  const [expanded, setExpanded] = useState(false);
+  const [isSmall, setIsSmall] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    setIsSmall(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsSmall(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const showCards = !isSmall || expanded;
+
+  return (
+    <div style={{ marginBottom: 56 }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: 8, paddingLeft: 2 }}>
+        <h2 style={{ color: colors.text.lowEmphasis.onLight, fontSize: 12, fontWeight: 500, lineHeight: '16px', letterSpacing: '0.2px' }}>Product stats</h2>
+        {isSmall && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-1 text-xs font-medium"
+            style={{ color: colors.brand.default }}
+          >
+            {expanded ? 'Collapse' : `View all (${STATS.length})`}
+            <ChevronDown size={14} style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }} />
+          </button>
+        )}
+      </div>
+      {showCards && (
+        <div className="flex gap-4 overflow-x-auto">
+          {STATS.map(stat => (
+            <div
+              key={stat.label}
+              className="card p-4 flex items-start gap-4 shrink-0 flex-1 min-w-[180px]"
+              style={{ backgroundColor: colors.surface.light, borderColor: colors.border.lowEmphasis.onLight }}
+            >
+              <div className="p-2 rounded-lg" style={{ backgroundColor: colors.surface.lightDarker, color: colors.text.disabled.onLight }}>{stat.icon}</div>
+              <div>
+                <p className="text-sm mb-1" style={{ color: colors.text.lowEmphasis.onLight }}>{stat.label}</p>
+                <p className="text-2xl font-bold" style={{ color: colors.text.highEmphasis.onLight }}>{stat.value}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function IconButton({ children, active, onClick, title }: { children?: React.ReactNode, active?: boolean, onClick?: () => void, title?: string }) {

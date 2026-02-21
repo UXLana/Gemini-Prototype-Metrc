@@ -1,6 +1,7 @@
 import React from 'react';
-import { useAppColors } from '../hooks/useDarkMode';
+import { useAppColors, useDarkMode } from '../hooks/useDarkMode';
 import { X } from 'lucide-react';
+import { Button } from 'mtr-design-system/components';
 import { MOCK_FILTERS } from './FilterDrawer';
 
 interface ActiveFiltersProps {
@@ -15,8 +16,8 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   onClearAll
 }) => {
   const colors = useAppColors();
+  const { isDark } = useDarkMode();
   
-  // Flatten filters to a list of chips
   const activeChips: { categoryId: string; categoryLabel: string; optionId: string; optionLabel: string; count?: number }[] = [];
   
   Object.entries(filters).forEach(([categoryId, optionIds]) => {
@@ -40,37 +41,30 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   if (activeChips.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+    <div className="flex flex-wrap items-center gap-2 mb-4">
       {activeChips.map(chip => (
         <div 
           key={`${chip.categoryId}-${chip.optionId}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+          className="flex items-center gap-1 pl-2 pr-1 py-1 rounded-full text-xs"
           style={{ 
-            backgroundColor: colors.surface.light, 
-            border: `1px solid ${colors.border.midEmphasis.onLight}`,
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)', 
             color: colors.text.highEmphasis.onLight
           }}
         >
-          <span>
-            <span style={{ color: colors.text.lowEmphasis.onLight }}>{chip.categoryLabel}:</span> {chip.optionLabel}
-            {chip.count !== undefined && <span style={{ color: colors.text.disabled.onLight }} className="ml-1">({chip.count})</span>}
-          </span>
+          <span>{chip.categoryLabel}: {chip.optionLabel}</span>
           <button 
             onClick={() => onRemove(chip.categoryId, chip.optionId)}
-            className="hover:bg-black/5 rounded-full p-0.5 transition-colors"
+            className="p-0.5 rounded-full hover:bg-black/10 transition-colors ml-0.5"
+            style={{ color: colors.text.lowEmphasis.onLight }}
           >
-            <X size={14} />
+            <X size={12} />
           </button>
         </div>
       ))}
       
-      <button 
-        onClick={onClearAll}
-        className="text-sm font-medium px-2 py-1 hover:underline transition-colors"
-        style={{ color: colors.text.lowEmphasis.onLight }}
-      >
+      <Button emphasis="low" size="md" onClick={onClearAll} style={{ minWidth: 'auto', height: 28, fontSize: 12 }}>
         Clear
-      </button>
+      </Button>
     </div>
   );
 };
