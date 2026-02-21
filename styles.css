@@ -82,6 +82,21 @@
     border-color: var(--mtr-brand-default);
   }
 
+  /* ───── Tab overrides ───── */
+
+  [role="tab"] {
+    border-radius: 6px !important;
+    margin-bottom: 4px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  [role="tab"][aria-selected="true"] > span:last-child {
+    height: 2px !important;
+    border-radius: 1px !important;
+    bottom: -4px !important;
+  }
+
   /* ───── Card surfaces ───── */
 
   .card {

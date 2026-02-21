@@ -312,6 +312,7 @@ export default function App() {
                             onTabChange={setActiveTab}
                             align="left"
                             hasDivider={false}
+                            onDark={isDarkMode}
                         />
                         <div className="pb-2 flex gap-2">
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
