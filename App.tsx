@@ -277,7 +277,7 @@ export default function App() {
                             <Button emphasis="high" leftIcon={<Plus size={16} />} onClick={() => setIsRegistrationModalOpen(true)}>
                                 Register product
                             </Button>
-                            <Button emphasis="low" leftIcon={<Package size={16} />} onClick={() => setBundleModalOpen(true)}>
+                            <Button emphasis="low" leftIcon={<Package size={16} />} onClick={() => setBundleModalOpen(true)} style={isDarkMode ? { color: 'rgba(27, 172, 121, 1)' } : undefined}>
                                 New bundle
                             </Button>
                         </div>
