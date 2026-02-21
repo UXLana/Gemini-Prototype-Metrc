@@ -18,6 +18,8 @@ import { CanopyLogo } from './components/CanopyLogo';
 import { RegistryLeftNav } from './components/RegistryLeftNav';
 import { BundleNameModal } from './components/BundleNameModal';
 import { BuildBundleView, BundleItem } from './components/BuildBundleView';
+import { FilterDrawer } from './components/FilterDrawer';
+import { ActiveFilters } from './components/ActiveFilters';
 
 export type UseCase = 'standard' | 'empty-search' | 'market-selection';
 
@@ -33,6 +35,9 @@ export default function App() {
     }
     return false;
   });
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<Record<string, Set<string>>>({});
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
@@ -321,7 +326,13 @@ export default function App() {
                             )}
                         </div>
                         <div className="flex items-center gap-2 ml-auto">
-                            <IconButton><Filter size={16} /></IconButton>
+                            <IconButton 
+                                onClick={() => setIsFilterOpen(true)} 
+                                active={isFilterOpen || Object.keys(activeFilters).length > 0}
+                                title="Filter"
+                            >
+                                <Filter size={16} />
+                            </IconButton>
                             <IconButton><ArrowUpDown size={16} /></IconButton>
                             <div className="h-6 w-px mx-1" style={{ backgroundColor: colors.border.lowEmphasis.onLight }}></div>
                             <IconButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')}><LayoutGrid size={16} /></IconButton>
@@ -329,6 +340,24 @@ export default function App() {
                         </div>
                     </div>
                 </div>
+
+                {/* Active Filters */}
+                <ActiveFilters 
+                    filters={activeFilters}
+                    onRemove={(categoryId, optionId) => {
+                        setActiveFilters(prev => {
+                            const next = { ...prev };
+                            if (next[categoryId]) {
+                                const nextSet = new Set(next[categoryId]);
+                                nextSet.delete(optionId);
+                                if (nextSet.size === 0) delete next[categoryId];
+                                else next[categoryId] = nextSet;
+                            }
+                            return next;
+                        });
+                    }}
+                    onClearAll={() => setActiveFilters({})}
+                />
 
                 {/* Product Grid / List */}
                 {viewMode === 'grid' ? (
@@ -461,6 +490,14 @@ export default function App() {
           />
         </div>
       )}
+
+      <FilterDrawer 
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        selectedFilters={activeFilters}
+        onApply={(filters) => setActiveFilters(filters)}
+        onReset={() => setActiveFilters({})}
+      />
 
       <Toast 
         message={toast.message} 
